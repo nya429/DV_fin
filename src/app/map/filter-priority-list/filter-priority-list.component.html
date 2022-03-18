@@ -1,0 +1,11 @@
+<div class="col-md-2 col-md-offset-3 dropdown-content"> 
+  <ul class="list-group dropdown-content">
+      <a   *ngFor="let priority of priorityList; let i = index"
+      style="cursor:pointer;"
+      (click)="onSelect($event, i)"
+      [ngClass]="{'borderless': i !== 0}"
+      class="list-group-item state-list">
+      {{ priority }} 
+ </a>
+  </ul>
+</div>

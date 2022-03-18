@@ -1,0 +1,62 @@
+
+  <form [formGroup]='settingForm'>
+
+    <div *ngIf='editMode' class="popup-background"></div>
+    <div *ngIf='editMode' class="popup">
+        <div class="row">
+            <label class='col-xs-offset-1 col-xs-10' for="key"><h4>New key-value pair</h4></label>
+        </div>
+        <div @slideInState  class="row block">
+            <div  class="form-group">
+                <div class="col-xs-offset-1 col-xs-10">
+                    <br>
+                    <label for="key">Key    
+                        <div class="alert alert-danger alert-label" *ngIf=" settingForm.get('key').touched && !settingForm.get('key').valid && settingForm.get('key').errors">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <Strong *ngIf="settingForm.get('key').errors['keyIsSame']">has been taken, try another one</Strong>
+                            <Strong *ngIf="settingForm.get('key').errors['required']">is required</Strong>
+                        </div>
+                    </label>
+                    <input (keydown.enter)='onAdd()' (keydown.esc)='onCancle()' autocomplete="off" placeholder="Key" type="text" class="form-control" id="key" formControlName="key">
+                
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-offset-1 col-xs-10">
+                     <br>
+                    <label for="value">Value
+                        <div class="alert alert-danger alert-label" *ngIf=" settingForm.get('value').touched && !settingForm.get('value').valid && settingForm.get('value').errors">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <Strong *ngIf="settingForm.get('value').errors['required']">is required</Strong>
+                        </div>
+                    </label>
+                    <input (keydown.enter)='onAdd()' (keydown.esc)='onCancle()' autocomplete="off" placeholder="Value" type="text" class="form-control" id="value" formControlName="value">
+                </div>
+            </div>
+      
+            <div class="col-xs-offset-1 col-xs-10" align=right>
+                    <br>
+                    <span>
+                        <button class="btn  btn-primary" 
+                        [disabled]='!settingForm.dirty || !settingForm.valid '
+                        (click)='editMode ? onAdd() : onNew()'
+                        [ngClass]="{'btn-success': editMode,
+                        'btn-primary': !editMode}">Add</button>
+                        <button *ngIf='editMode' [disabled]='!editMode'
+                        (click)='onCancle()'
+                        class="btn btn-danger">Cancle</button>
+                    </span>
+            </div>
+        </div>
+    </div>
+</form>
+
+<span class='add-button-group'>
+        <a class="btn-round block cursor-pointer" 
+        (click)='editMode ? onCancle() : onNew()'>
+         <span class='btn-plus block' [ngClass]="{'btn-plus-rotate': editMode}">
+            <span class='plus-bar plus-bar-hor block'></span>
+            <span class='plus-bar plus-bar-ver block'></span>
+         </span>
+        </a>
+</span>

@@ -1,0 +1,29 @@
+<div class="col-md-2 col-md-offset-3 dropdown-content panel panel-default"> 
+    <div class="row">
+      <form #f="ngForm">
+        <input (keyup)='getCompanys(f)' 
+        (focus)='inputFocus = true'
+        (blur)='inputFocus = false'
+        ngModel 
+        name='term' type='text' 
+        id='company-term' 
+        class='form-control company-filter-input'
+        autocomplete='off'
+        placeholder="Search company">
+        <span [ngClass]="{'icon-focus': inputFocus}" id="search-input-icon" class="glyphicon glyphicon-search inline"></span>
+      </form>
+    </div>
+    <div  class="row company-list">
+        <ul [@listItemFadeSlideState]='companys?.length' class="list-group">
+            <a *ngIf="!companysLookingUp && companys?.length === 0"
+            style='cursor: no-drop;'
+            class="list-group-item  company-list-item">
+             No result
+           </a>
+            <a style='cursor: pointer;' (click)='onSelect($event, company)' *ngFor="let company of companys;let i = index"
+            class="list-group-item  company-list-item">
+           {{ company['company_name'] }}
+           </a>
+        </ul>
+    </div>
+  </div>

@@ -1,0 +1,23 @@
+<div class="col-md-6 col-md-offset-3 dropdown-content panel panel-info"> 
+    <div class="row">
+        <label><input type="checkbox" value="">Select/Diselect All</label>
+        <label><input type="checkbox" value="">Select/Diselect All</label>
+        <label><input type="checkbox" value="">Select/Diselect All</label>
+      </div>
+        <span 
+        (click)="onClose($event)" 
+        style="cursor:pointer;"
+        title='close' 
+        class="pull-right" id='close-buttom'>&times;</span>
+      
+      <hr>
+      <div class="row">
+        <li *ngFor="let participant of participants; let i = index" class="list-group-item list-item-result">
+           <label class='inline'>
+             <input (change)="onParticipantCheck($event, i)"  
+                    class='checkbox-big' type="checkbox" [value]="i">
+            </label>
+           <span class='inline'>{{ participant.firstName }} {{ participant.lastName }}</span> 
+        </li>
+      </div>
+    </div>

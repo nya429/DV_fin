@@ -1,0 +1,47 @@
+<a [ngClass] ="{'isSelected':isSelected, 'ishide': hidden}"
+   class="tracker-item list-group-item clearfix">
+    <div (click)='onSelect()' style="cursor: pointer;">
+      <div  class="tracker-info" [ngClass] ="{'tracker-info-hide': editMode, 'tracker-info-display': !editMode}" >
+        <span class="tracker-indicator">
+            <i  [ngClass]="{'fa-circle-o': !mapService.mapStarted, 'fa-circle': mapService.mapStarted}"
+                class="fa"></i>
+            </span>
+        <!-- <span class="tracker-id">{{tracker.id}}</span> -->
+        <span class='tracker-alias'> {{ alias }} </span>
+        <span #color class='tracker-color'>    </span>
+        <span class="tracker-actions" align="right">
+                <i (click)='onEdit($event)'class="glyphicon glyphicon-pencil margin"></i>
+                <i title='hide' (click)='onHide($event)' 
+                [ngClass]="{'glyphicon-eye-close': hidden, 'glyphicon-eye-open': !hidden}" 
+                class="glyphicon margin"></i>
+        </span>
+    </div>
+        <div class="input-group tracker-info-input" [ngClass] ="{'tracker-info-hide': !editMode, 'tracker-info-display': editMode}" >  
+            <form  #f="ngForm">
+                <input ngModel autocomplete="off" maxlength="15" [value]='alias'
+                       type="text" name="alias" id="alias" 
+                       class="form-control tracker-input inline-block" >  
+                <!-- <div class="input-group-btn form-group">   -->
+                    <!-- <div class="tracker-color-indicator-wrapper">
+                            <span  class='tracker-color-indicator'>    </span>
+                    </div> -->
+                    <select #colordot [ngModel]="color" name="color" (change)="onColorSelect(f)"
+                        class="color-select inline-block" required>  
+                        <option class="color-options" style="background-color:deepskyblue" value="deepskyblue">SKY</option> 
+                        <option class="color-options" style="background-color:LIME" value="LIME">LIME</option>
+                        <option class="color-options" style="background-color:lemonchiffon" value="lemonchiffon">LEMON</option>    
+                        <option class="color-options" style="background-color:orange" value="ORANGE">GOLD</option>  
+                        <option class="color-options" style="background-color:RED" value="RED">TOMATO</option>  
+                        <option class="color-options" style="background-color:BLUEVIOLET" value="BLUEVIOLET">VIOLET</option>  
+                    </select>  
+
+                    <span class="input-group-btn btn-wrapper">  
+                            <a class="btn margin" type="submit"(click)="onSubmit(f)"><i class="glyphicon glyphicon-ok"></i></a>  
+                            <a class="btn margin" type="submit" (click)="onCancle($event)"><i class="glyphicon glyphicon-remove"></i></a>  
+                    </span>  
+                <!-- </div>   -->
+           </form>
+      </div>  
+    </div>
+
+</a>

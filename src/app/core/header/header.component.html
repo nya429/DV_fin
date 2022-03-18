@@ -1,0 +1,41 @@
+
+<nav [ngClass]="{'container-expanded':logoExpanded, 'container-transparent':headerTransparent}"  class="header navbar navbar-default navbar-fixed-top">
+  <div class="container">
+
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header ">
+      <button  type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand"  routerLink="">
+        <!-- <span class="brand-logo">UBQ</span> Systems -->
+        <img  [ngClass]="{'logo-expanded':logoExpanded}" alt="logo" 
+               src="../assets/logo-horizantal-01-b-01.svg"
+               class="img-responsive brand-logo"  [ngClass]="{'expanded':logoExpanded}" 
+        >
+      </a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul  [ngClass]="{'navbar-expanded':logoExpanded}" class="nav navbar-nav navbar-right">
+          <!-- <li  routerLinkActive="active"><a routerLink="/home">Home</a></li> -->
+          <li  routerLinkActive="active"><a routerLink="/dashboard"><span class="
+            glyphicon glyphicon-list-alt"></span> Dashboard</a></li>
+          <li   routerLinkActive="active"><a routerLink="/map"><span class="
+            glyphicon glyphicon-map-marker"></span> Tracker Map</a></li>
+          <li   routerLinkActive="active"><a routerLink="/setting"><span class="
+            glyphicon glyphicon-cog"></span> Config</a></li>
+
+          <!-- <li routerLinkActive="active"><a routerLink="/about">Manual</a></li> -->
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div>
+</nav>
+
+
+
+
+

@@ -1,0 +1,69 @@
+.margin {
+    margin-top:1px;
+    margin-bottom:2px;
+}
+
+.wrap {
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.no-margin {
+    margin: 0px;
+}
+
+.no-padding {
+    padding-left: 0;
+    padding-right: 1px;
+}
+
+.form-padding {
+    padding: 6px 12px;
+}
+
+.edit-btn-group {
+    padding: 6px 0px;
+}
+
+.setting-row {
+    border-bottom: 2px solid lightgrey;
+    display: block;
+}
+
+.edit-icon {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.edit-icon-hidden {
+    visibility: hidden;
+}
+
+.edit-icon:hover > .edit-icon-hidden, 
+.edit-icon:active > .edit-icon-hidden  {
+    visibility: visible;
+}
+
+.pointer {
+    cursor: pointer;
+} 
+
+.align-box {
+    border: 1px solid black;
+}
+
+.edit-indent {
+    padding-left: 28px;
+}
+
+@media screen and (max-width: 700px) {
+    .edit-icon-hidden {
+        display: none;
+    }
+    
+    .edit-icon:hover > .edit-icon-hidden, 
+    .edit-icon:active > .edit-icon-hidden  {
+        display: none;
+    }
+  }

@@ -1,0 +1,41 @@
+.bold {
+    font-weight: bolder;
+}
+
+.setting-row {
+    padding-bottom: 15px;
+    border-bottom: 2px solid grey;
+}
+
+app-universal-setting-item {
+    display: block;
+}
+
+.setting-penal {
+    min-height: 80vh;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.glyphicon {
+    font-size: 18px;
+}
+
+#panel-btn-refresh span{
+    opacity: .7;
+    transition: .3s;
+    transform: rotate(0);
+}
+
+#panel-btn-refresh:hover span  {
+    opacity: 1;
+    transition: .3s;
+    transform: rotate(180deg);
+}
+
+#panel-btn-refresh:active span {
+    opacity: .5;
+    transition: .3s;
+}

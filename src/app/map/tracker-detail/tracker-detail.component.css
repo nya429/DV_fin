@@ -1,0 +1,50 @@
+
+/* tr:nth-child(even) {
+    background-color: #f2f2f2;
+} */
+
+.fa.fa-signal,.fa.fa-battery-4 {
+    color: #00a1d6;
+    font-size: 20px;
+}
+
+.tracker-img {
+    width: 60%;
+}
+
+.editImg {
+    width:10%;
+    height:10%;
+    position:absolute;
+    top:0;
+    right:20%;
+}
+
+.td-title {
+    width:15%;
+    text-align: right;
+}
+
+.td-value {
+    width:35%;
+    text-align: left;
+}
+
+.editImg {
+    float: right;
+}
+
+.form-control {
+
+}
+
+.detail-name {
+    width: 100%;
+    white-space: nowrap;
+}
+
+.detail-time {
+    white-space: nowrap;
+    color: #337ab7;
+    font-size: 16px;
+}

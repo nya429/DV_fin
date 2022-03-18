@@ -1,0 +1,25 @@
+.panel-title {
+    padding-top: 5px;
+}
+
+
+.nav.nav-tabs {
+    background-color: #d9edf7;
+}
+
+.nav.nav-tabs li a {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.nav.nav-tabs li a:hover {
+    color: #00a1d6;
+    background-color: #e4f5f9;
+}
+
+.nav.nav-tabs li.active a, .nav.nav-tabs li.active a:hover {
+    color: #00a1d6;
+    background-color:white;
+    font-size: 16px;
+    font-weight: 500;
+}

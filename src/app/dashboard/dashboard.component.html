@@ -1,0 +1,16 @@
+ <div [@fadeIn]="fadeInState" class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+              <app-dashboard-nav></app-dashboard-nav>  
+            </div>
+            <div class="col-sm-9 col-md-10  main">
+              <router-outlet></router-outlet>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

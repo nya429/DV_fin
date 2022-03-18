@@ -1,0 +1,14 @@
+<div  class="panel panel-info tracker-penal">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{ trackers && trackers.length }} Trackers
+       <a class='cursor-pointer' id="panel-btn-refresh"><span class="glyphicon glyphicon-refresh" (click)='getLastActiveTrackers()'></span></a>
+    </h3>  
+  </div>
+    <ul [@listItemFadeSlideState]='trackers?.length' class="list-group"  id='trackers-list'>
+        <app-tracker-list-item 
+        *ngFor='let tracker of trackers;let i = index'
+        [tracker]="tracker"
+        [index] = "i"
+        ></app-tracker-list-item>
+    </ul>
+</div>

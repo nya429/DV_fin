@@ -1,0 +1,135 @@
+<div class="panel panel-info">
+  <!-- <div class="panel-heading">
+    <div class="row">
+      <div class="col-md-6 col-lg-6 " align="left">
+        <h3 class="panel-title">Control Panel</h3>
+      </div>
+      <div class="col-md-6 col-lg-6 " align="right">
+          <a  title='config' type="button" class="btn"><i class="	glyphicon glyphicon-cog"></i></a>
+       </div>
+    </div>
+  </div> -->
+  <div [ngClass]="{'penal-body-folded': filterFolded, 'penal-body-unfolded': !filterFolded}" class="panel-body" >
+    <br>
+    <div class="row">
+        <form #f="ngForm" >
+        <!-- <div class="col-sm-3">
+          <div class="search-grp">
+          <input class="inline search-grp-input" placeholder="search"  type="text">
+          <input class="inline search-grp-dropdown" placeholder="All" type="text">
+                  <span class="input-group-btn">  
+                  <button (click)='onSerachByTerm()'class="btn btn-info" type="submit">Search</button>  
+                </span>  
+         </div>
+        </div> -->
+        <div class="col-md-6 col-md-offset-3 col-sm-9 form-group"
+            appClickOutside 
+            (clickOutside)="onFilterFold()">
+            
+              <div class="input-group"> 
+
+                <span  (click)='onInputFocus()' 
+                        [ngClass]="{'border-focused': filterInputFocused}" 
+                        class="input-group-border">
+
+                  <div (click)='onDropdownClick($event)' 
+                        style="cursor:pointer;"
+                        [ngClass]="{'dropdown-expand': !dropdownFolded}" 
+                        class="input-group-prepend"> 
+                      <span 
+                        *ngIf="companyFilter['company_id']"
+                        (click)='onDropdownRemove($event)' 
+                         class="vertical-middle-remove">&times;</span> 
+                      <span [@companyFilterSlideState]="companyFilter['company_id'] ? 'removal' : 'all'"
+                       class="company-filter-text">{{ companyFilter['company_name'] }}</span>
+                      <span [ngClass]="{'dropdownFocus': !dropdownFolded}"
+                            class="caret vertical-middle-caret"></span>
+                  </div> 
+                  
+                  <input #term='ngModel' name="term" ngModel 
+                  (focus)='onFilterInputClick()' 
+                  autocomplete="off" 
+                  type="text" id="term" 
+                  class="form-control input-group-input" 
+                  [ngClass]="{'input-shrink': !dropdownFolded}" 
+                  placeholder="Tracker Filter">   
+                </span>
+
+                <span class="input-group-btn input-group-btn-filter">  
+                    <button (click)='onSerachByTerm()'class="btn btn-info" type="submit">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>  
+                </span>  
+
+              </div>  
+              <div @hiddenItemState
+              *ngIf='!filterFolded' class="filter-zone">
+              <div class="row">
+                  <div class="col-sm-12">
+                      <label class='filter-text'>Filters: </label>
+                      <span class="select-wrapper">
+                          <select required id="priority-status"
+                          name="priorityStatus" [ngModel]='priorityFilter'
+                          (change)='onPrioritySelect()'
+                          class="form-control filter-selection">
+                              <option value="0">All Priorities</option>
+                              <option value="2">Only Visitors</option>
+                              <option value="1">Only VIPs</option> 
+                          </select>
+                      </span>
+                    <span class="select-wrapper">
+                      <select required 
+                      class="form-control filter-selection">
+                          <option value="0">More filters</option> 
+                      </select>
+                    </span>
+                    <span 
+                    (click)="onFilterFold()" 
+                    style="cursor:pointer;"
+                    title='close' 
+                    class="pull-right" id='close-buttom'>&times;</span>
+                  </div>
+              </div>
+            </div>
+
+        </div>  
+      </form> 
+        <div class="col-sm-3" align="right">
+          
+          <!-- <button class="btn btn-danger"  (click)='getHistory()'>test</button>
+          <button class="btn btn-success" [disabled]="stopping" (click)='onStart()'>{{ started ? 'Pause' : 'Start'}}</button>
+          <button class="btn btn-danger" [disabled]="!initiated" (click)='onStop()'>Stop</button> -->
+          
+          <div class="playmode"  [ngClass]="{'realtime': !playBackMode, 
+          'playback': playBackMode}" >
+              <div class="playmode-icon">
+                  <i class="fa fa-history" style="font-size:28px"></i>
+              </div>
+              <i class="penal-toggle fa fa-toggle-on cursor-pointer" (click)='onToggle()'
+              [ngClass]="{'cursor-notallow': !stopped }" 
+              style="font-size:36px"></i>
+              <div class="playmode-icon">
+                  <i class="fa fa-mail-forward" style="font-size:28px"></i>
+              </div>
+              
+          </div>
+          
+          <span (click)='onStart()' 
+          [ngClass]="{
+          'action-start-busy': stopping,
+          'glyphicon-play':  (initiated && !started) || stopped,
+          'glyphicon-pause':  started,
+          'action-start-off': (initiated && !started),
+          'action-start-on': started }" 
+          class="penal-action glyphicon glyphicon-play"></span>
+
+          <span (click)='onStop()' 
+          [ngClass]="{'action-stop-disable': !initiated && !started,
+          'action-stop-busy': stopping,
+          'action-stop-on': started || (initiated && !started) }" 
+          class="penal-action glyphicon glyphicon-off"></span>
+      
+          
+        </div>
+    </div>
+  </div>

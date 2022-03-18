@@ -1,0 +1,36 @@
+.dropdown-content {
+    position: absolute;
+    margin-top: -33px;
+    z-index: 9; 
+    box-shadow: 2px 2px 5px  rgba(180,180,180, .5);
+    background-color: #FFF;
+}
+
+#close-buttom {
+    font-size: 20px;
+    margin: 15px;
+}
+
+.inline {
+    display: inline;
+}
+
+.checkbox-big {
+        margin-top: -1px;
+        width: 20px;
+        height: 20px;
+        box-sizing: border-box;
+        display: inline-block;
+        border: 3px solid blue;
+        vertical-align: middle;
+}
+
+.list-item-result {
+    padding: 5px 10px;
+    border: none;
+}
+
+.btn-icon-padding {
+   padding-left: 3px;
+   padding-right: 3px; 
+}

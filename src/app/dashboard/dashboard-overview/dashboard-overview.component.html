@@ -1,0 +1,191 @@
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+            <div class="panel panel-info tracker-penal">
+                <div class="panel-body">
+                    <div class='overview-heading'>
+                      <div class="row">
+                        <div class="col-md-4">
+                          <h3>Overview</h3>
+                          <p>At a glance</p>
+                        </div>
+                        <div class="col-md-2" style='color:#00a1d6;'>
+                                <br> 
+                                <p>Q1: 4,889</p>
+                                <i style='font-size:20px' class="fa fa-bar-chart" aria-hidden="true"></i>
+                               
+                        </div>
+                        <div class="col-md-2">
+                                <br> 
+                                <p>$12,550</p>
+                                <i style='font-size:20px' class="fa fa-bar-chart" aria-hidden="true"></i>
+                               
+                                
+                        </div>
+                        <div class="col-md-2">
+                                <br>
+                                <p>24h31m</p>
+                                <i style='font-size:20px' class="fa fa-bar-chart" aria-hidden="true"></i>
+                              
+                                  
+                        </div>
+                        <div class="col-md-2">
+                             <button style='font-size:20px'class="btn btn-warning">Analytics</button>
+    
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                
+            </div>
+          </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+          <div class="panel panel-info tracker-penal">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-10 mainchart">
+                       <router-outlet></router-outlet>
+                  </div>
+                  <div class="col-lg-2">
+                        <br>
+                        <div class="row">
+                            <div class="col-lg-12 col-md-3 col-sm-4 col-xs-6" align="center">
+                                <button class="btn btn-info">View Report</button>
+                               <hr> 
+                           </div>    
+                            <div class="col-lg-12 col-md-3 col-sm-4 col-xs-6" align="center">
+                                <i class="fa fa-line-chart" aria-hidden="true"></i>
+                                <p>Q1: 4,889</p>
+                                <br>   
+                            </div>
+
+                            <div class="col-lg-12 col-md-3 col-sm-4 col-xs-6" align="center" style='color:#00a1d6;'>
+                                <i class="fa fa-area-chart" aria-hidden="true"></i>
+                                <p>$12,550</p>
+                                <br>   
+                            </div>
+                            <div class="col-lg-12 col-md-3 col-sm-4 col-xs-6" align="center">
+                                <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                                <p>24h31m</p>
+                                <br>   
+                            </div>
+                        </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 col-lg-4">
+    
+          <div class="panel panel-info tracker-penal">
+              <div class="panel-heading">
+                  <div class="row">
+                  <div class="col-md-6 col-lg-6 " align="left">
+                      <h3 class="panel-title">Mini Chart</h3>
+                    </div>
+                    <div class="col-md-6 col-lg-6 " align="right">
+                        <a routerLink='piechart'><span class="glyphicon glyphicon-cog"></span></a>
+                    </div>
+                  </div>
+              </div>
+              <div class="panel-body">
+                  <div class='dashboard-main-chart'>
+                      <app-dashboard-piechart></app-dashboard-piechart>
+                  </div>
+              </div>
+              
+          </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+    
+          <div class="panel panel-info tracker-penal">
+              <div class="panel-heading">
+                  <div class="row">
+                  <div class="col-md-6 col-lg-6 " align="left">
+                      <h3 class="panel-title">Mini Chart</h3>
+                    </div>
+                    <div class="col-md-6 col-lg-6 " align="right">
+                        <a routerLink='linechart'><span class="glyphicon glyphicon-cog"></span></a>
+                    </div>
+                  </div>
+              </div>
+              <div class="panel-body">
+                  <div class='dashboard-main-chart'>
+                      <app-dashboard-linechart></app-dashboard-linechart>
+                  </div>
+              </div>
+              
+          </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+    
+          <div class="panel panel-info tracker-penal">
+              <div class="panel-heading">
+                  <div class="row">
+                  <div class="col-md-6 col-lg-6 " align="left">
+                      <h3 class="panel-title">Mini Chart</h3>
+                    </div>
+                    <div class="col-md-6 col-lg-6 " align="right">
+                        <a routerLink='barchart'><span class="glyphicon glyphicon-cog"></span></a>
+                    </div>
+                  </div>
+              </div>
+              <div class="panel-body">
+                  <div class='dashboard-main-chart'>
+                      <app-dashboard-barchart></app-dashboard-barchart>
+                  </div>
+              </div>
+              
+          </div>
+      </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-lg-4">
+    
+            <div class="panel panel-info tracker-penal">
+                <div class="panel-heading">
+                    <div class="row">
+                    <div class="col-md-6 col-lg-6 " align="left">
+                        <h3 class="panel-title">Mini Chart</h3>
+                      </div>
+                      <div class="col-md-6 col-lg-6 " align="right">
+                          <a><span class="glyphicon glyphicon-cog"></span></a>
+                      </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class='dashboard-main-chart'>
+                        <app-dashboard-barchart></app-dashboard-barchart>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+    
+            <div class="panel panel-info tracker-penal">
+                <div class="panel-heading">
+                    <div class="row">
+                    <div class="col-md-6 col-lg-6 " align="left">
+                        <h3 class="panel-title">Mini Chart</h3>
+                      </div>
+                      <div class="col-md-6 col-lg-6 " align="right">
+                          <a><span class="glyphicon glyphicon-cog"></span></a>
+                      </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class='dashboard-main-chart'>
+                        <app-dashboard-barchart></app-dashboard-barchart>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+  </div>
+

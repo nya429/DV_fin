@@ -1,0 +1,71 @@
+.dropdown-content {
+    position: absolute;
+    top: 71px;
+    left: 23px;
+    z-index: 2;
+    max-height: 300px;
+    min-width: 100px;
+    box-shadow: 0 2px 2px 1px rgba(0, 0, 0, .2);
+}
+
+.panel {
+    transition: max-height 300ms ease-out; 
+}
+
+.borderless {
+    border-top: 0 none;
+}
+
+.company-filter-input{
+    margin-top:10px;
+    align-content: center;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding-left: 24px;
+}
+
+.company-filter-input:focus{
+    border-color: #66afe9;
+    box-shadow: 0 15px 10px -15px rgba(102,175,233,.6);
+}
+
+.company-list-item {
+    border: none;
+    line-height: .4em;
+}
+
+.inline {
+    display: inline;
+}
+
+#search-input-icon {
+    position: absolute;
+    top: 19px;
+    left: 6px;
+    color:#aaa;
+    transition: color 1000 ease-out;
+}
+
+.icon-focus {
+    color: #66afe9 !important; 
+}
+
+#search-input-icon {
+    position: absolute;
+    top: 19px;
+    left: 6px;
+    color:#aaa;
+}
+
+.company-list {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.list-group {
+    margin-bottom: 0;
+}
+

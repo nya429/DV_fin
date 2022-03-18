@@ -1,0 +1,39 @@
+.panel-body {
+    box-shadow: 2px 2px 5px  rgba(30,30,30, .4);
+    margin: 100px 0;
+}
+
+.img-container {
+    margin: 40px 0 20px 0;
+}
+
+.avatar {
+    width: 40%;
+}
+
+input::after {
+    content: "";
+    height:100%;
+    width: 10px;
+    color:red;
+    position: absolute;
+
+}
+
+.fluid-gradient {
+    background: linear-gradient(-45deg, #DDA0DD, #7B68EE, #23A6D5, #23D5AB);
+	background-size: 400% 400%;
+    animation: Gradient 10s ease infinite;
+}
+
+@keyframes Gradient {
+	0% {
+		background-position: 0% 50%
+	}
+	50% {
+		background-position: 100% 50%
+	}
+	100% {
+		background-position: 0% 50%
+	}
+}

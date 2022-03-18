@@ -1,0 +1,30 @@
+<div class="row setting-row"  [@scale]="scaleState" [appTableStriped]='index'>
+    <div *ngIf='!editMode'>
+        <div class="col-xs-5 margin form-padding wrap">
+            <span>{{ setting.key() }}</span>
+        </div>
+        <div class="col-xs-5 margin form-padding wrap">
+            <span>{{ setting.value() }}</span>
+        </div>
+    </div>
+    <form *ngIf='editMode' [formGroup]="settingForm" (ngSubmit)="onUpdate()">
+        <div class="col-xs-5 form-group no-padding no-margin">
+            <input (keydown.enter)='onUpdate()' (keydown.esc)='onCancle()'  type="text" class="form-control" id="key" formControlName="key">
+        </div>
+        <div class="col-xs-5 form-group no-padding no-margin">
+            <input (keydown.enter)='onUpdate()' (keydown.esc)='onUpdate()' type="text" class="form-control" id="value" formControlName="value">
+        </div>
+    </form>
+    <div class="col-xs-2 margin edit-btn-group">
+        <span *ngIf='!editMode' >
+            <a (click)='onEdit()'  class="edit-icon pointer"><span title='Edit' class="glyphicon glyphicon-pencil edit-icon-hidden"></span> Edit</a>
+            <a (click)='onRemove()' class="edit-icon pointer"><span title='Delete' class="glyphicon glyphicon-remove"></span></a>
+        </span>
+        <span *ngIf='editMode' class="edit-indent" >
+            <a (click)='onUpdate()'  class="edit-icon pointer"><span title='Update' class="glyphicon glyphicon-ok"></span></a>
+            <a (click)='onCancle()'  class="edit-icon pointer"><span title='Cancle' class="glyphicon glyphicon-remove"></span></a>
+        </span>
+    </div>
+</div>
+
+    

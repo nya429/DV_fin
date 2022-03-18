@@ -1,0 +1,41 @@
+<!-- <div class="container-fluid">
+    <!-- <div class="row">
+        <app-map-menu></app-map-menu>
+    </div>
+    <br>
+    <div class="row">
+        <router-outlet></router-outlet>
+    </div>
+</div> -->
+<div class="container map-body">
+    <div class="row">
+            <div class="col-md-12">
+                <app-map-control-penal></app-map-control-penal>
+                <app-filter-company-dropdown 
+                   *ngIf='!dropdownFolded'
+                   appClickOutside 
+                   (clickOutside)="onCompanyDropdownFold()"
+                   ></app-filter-company-dropdown>
+                <!-- <app-filter-priority-list></app-filter-priority-list> -->
+                <!-- <app-search-result-list></app-search-result-list> -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <app-tracker-list></app-tracker-list>
+            </div>
+            <div class="col-md-9"> 
+                <app-tracking-map></app-tracking-map>
+           </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                 <app-map-menu></app-map-menu>
+            </div> 
+        </div>
+ </div>
+ <app-map-tooltip></app-map-tooltip>
+
+
+
+              
