@@ -5,7 +5,7 @@ class API {
     public setting: string;
 
     private hosts = {
-        'localhost': 'http://localhost:3000/',
+        'localhost': 'http://localhost:8000/api/',
         'aws'      : 'http://18.218.72.63:80/api/',
         'ubuntu'      : 'http://23.20.246.186:80/api/',
         'mywin'    : 'http://192.168.0.113:3000/'
@@ -38,7 +38,7 @@ class API {
         // console.log(host);
         this.participant = `${host}participant`;
         this.company    = `${host}company`;
-        this.event     = `${host}event`;
+        this.event     = `${host}map`;
         this.setting = `${host}setting`;
 
         return option;

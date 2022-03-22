@@ -26,7 +26,7 @@ export class Tracker {
         if (participant) {
             this.participant = participant;
         }
-        this.alias = participant ? participant.firstName[0] + '.' + participant.lastName : 'Tracker#' + id;
+        this.alias = participant ? participant.firstName[0] + '.' + participant.lastName : 'Tracker#' + tag_id;
         // this.note = 'This is a tracker';
         this.color = this.participant && this.participant.priorityStatus ?
         (this.participant.priorityStatus === 1 ? 'orange' : 'deepskyblue') :

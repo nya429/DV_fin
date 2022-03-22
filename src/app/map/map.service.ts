@@ -323,23 +323,30 @@ export class MapService {
           );
     }
 
-    changeTrackers(participants) {
-        const trackers = [];
-        participants.forEach((participant, i) => {
-          const tracker = new Tracker(i + 1, participant['tag_id'], null, null, new Participant(participant));
-          trackers.push(tracker);
-          if (i === participants.length - 1) {
-            this.trackers = trackers.slice();
-            console.log('DEBUG changeTrackers');
-             console.log('DEBUG', this.trackers);
-            this.trackerListChanges.next();
-          }
+    changeTrackers(trackers_) {
+        // const trackers = [];
+        // participants.forEach((participant, i) => {
+        //   const tracker = new Tracker(i + 1, participant['tag_id'], null, null, new Participant(participant));
+        //   trackers.push(tracker);
+        //   if (i === participants.length - 1) {
+        //     this.trackers = trackers.slice();
+        //     console.log('DEBUG changeTrackers');
+        //      console.log('DEBUG', this.trackers);
+        //     this.trackerListChanges.next();
+        //   }
+        // });
+
+        const trackers = trackers_.map((tracker, i) => {
+           return new Tracker(i + 1, tracker['tracker_id'], null, null, null);
         });
+
+        this.trackers = trackers.slice();
+        this.trackerListChanges.next();
     }
 
     getParticipantLocalsByTime(id: string, begin?: number, end?: number) {
-        const urlSuffix = 'tracker/locs/span';
-        const con = {'begin': begin, 'end': end, 'id': id};
+        const urlSuffix = 'locations';
+        const con = {'begin': begin, 'end': end, 'tracker_id': id};
         console.log('DEBUG', con)
         return this.httpClient.post(`${this.httpOptions.eventUrl()}/${urlSuffix}`, con, {
             observe: 'body',
@@ -348,8 +355,7 @@ export class MapService {
           .subscribe(
               (result) => {
                 const data = result['data'];
-                console.log('DEBUG', 'getParticipantLocalsByTime');
-                console.log('DEBUG', data);
+                console.log('DEBUG', 'getParticipantLocalsByTime', data);
                 this.trackerLocsReady.next(data);
               }, (err: HttpErrorResponse)  => {
                 console.error(err);
@@ -367,7 +373,7 @@ export class MapService {
     }
 
     getLastActiveTrackers() {
-        const urlSuffix = 'tracker/lastActive';
+        const urlSuffix = 'tracker/last_active';
         const limit = 15;
         return this.httpClient.get(`${this.httpOptions.eventUrl()}/${urlSuffix}`, {
             observe: 'body',
@@ -375,12 +381,11 @@ export class MapService {
           })
           .subscribe(
               (result) => {
-                const participants = result['data']['trackers'];
-                console.log('DEBUG getLastActiveTracker')
-                console.log('DEBUG', participants)
-                if (participants && participants.length > 0) {
+                const trackers = result['data'];
+                console.log('DEBUG getLastActiveTracker', trackers);
+                if (trackers && trackers.length > 0) {
                     this.stop();
-                    this.changeTrackers(participants);
+                    this.changeTrackers(trackers);
                 } else {
                     this.onLoaded.next(false);
                 }
@@ -410,7 +415,7 @@ export class MapService {
             let customer_ids_index = 1;
             this.trackerLocsListener = this.trackerLocsReady.subscribe(data => {
                 this.trackers.forEach(trac => {
-                    if (trac.tagId === data[0].customer_id) {
+                    if (trac.tagId === data[0].tracker_id) {
                         // API
                         trac.setCrd((data[0].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                              (data[0].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
