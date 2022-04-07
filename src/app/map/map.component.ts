@@ -34,17 +34,17 @@ export class MapComponent implements OnInit, OnDestroy {
 
   @HostListener('window:blur')
   onLeave() {
-    // if (this.mapService.mapStarted) {
-    //   this.leave = true;
-    // }
-    // this.mapService.stop();
+    if (this.mapService.mapStarted) {
+      this.leave = true;
+    }
+    this.mapService.stop();
   }
 
   @HostListener('window:focus')
   onFocus() {
     if (this.leave) {
-      // this.mapService.onLeavePage();
-      // this.leave = false;
+      this.mapService.onLeavePage();
+      this.leave = false;
     }
   }
 

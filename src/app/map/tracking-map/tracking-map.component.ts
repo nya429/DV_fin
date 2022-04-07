@@ -170,6 +170,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     );
   }
 
+  // historical mode
   onTest() {
     this.mapService.mapStopped = false;
     this.mapService.stopped.next(false);

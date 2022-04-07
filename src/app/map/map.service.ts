@@ -66,7 +66,7 @@ export class MapService {
     trackerLocsListener: Subscription;
     trackerLocsSet = [];
     onTest = new EventEmitter<boolean>();
-
+    sysTime: any;
     // TODO those are participants
     private trackers: Tracker[];
     // dummy move
@@ -120,6 +120,10 @@ export class MapService {
         ];
     }
 
+    setSysTime(time: any) {
+        this.sysTime = time;
+    }
+
     start() {
         this.onStarted.next(this.mapStarted);
     }
@@ -130,13 +134,13 @@ export class MapService {
         this.onLoading.next(true);
         const listChangeSub = this.trackerListChanges.subscribe(() => {
             listChangeSub.unsubscribe();
-            
+
             const customer_ids =  this.trackers.map(tracker => tracker.tagId);
             console.log(customer_ids);
             // this.trackerLocsListener = this.trackerLocsReady.subscribe(data => {
             //     this.trackerLocsListener.unsubscribe();
-            
-            //     this.trackers.forEach(trac => 
+
+            //     this.trackers.forEach(trac =>
             //         trac.setCrd((data[trac['customer_id']].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
             //         (data[trac['customer_id']].loc_y + 0.5) / this.trackerBoundary.y * this.base.width));
 
@@ -155,16 +159,14 @@ export class MapService {
                     trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                     (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
                   });
-                    //Whenever get the trackers, ready to call
+                    // Whenever get the trackers, ready to call
                     this.onLoaded.next(true);
                     this.onStarted.next(this.mapStarted);
                 }, (err: HttpErrorResponse)  => {
                   console.error(err);
                 }
             );
-
- 
-        })
+        });
     }
 
     pause() {
@@ -175,7 +177,7 @@ export class MapService {
 
 
     stop() {
-        this.pause()
+        this.pause();
         this.onStopped.next(this.mapStopped);
     }
 
@@ -221,7 +223,7 @@ export class MapService {
             // });
             // this.trackerLocChanges.next(this.trackers.slice());
 
-            //realMove
+            // realMove
             this.realtimeMove();
         }, 800);
     }
@@ -251,10 +253,10 @@ export class MapService {
         this.getParticipantLocalsByIds(customer_ids).subscribe(
            (result) => {
              const data = result['data'];
-             this.trackers.forEach(trac => 
+             this.trackers.forEach(trac =>
                trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width));
-               console.log(this.trackers[0])
+               console.log(this.trackers[0]);
                this.trackerLocChanges.next(this.trackers.slice());
         });
     }
@@ -347,7 +349,7 @@ export class MapService {
     getParticipantLocalsByTime(id: string, begin?: number, end?: number) {
         const urlSuffix = 'locations';
         const con = {'begin': begin, 'end': end, 'tracker_id': id};
-        console.log('DEBUG', con)
+        console.log('DEBUG', con);
         return this.httpClient.post(`${this.httpOptions.eventUrl()}/${urlSuffix}`, con, {
             observe: 'body',
             responseType: 'json',
@@ -415,14 +417,17 @@ export class MapService {
             let customer_ids_index = 1;
             this.trackerLocsListener = this.trackerLocsReady.subscribe(data => {
                 this.trackers.forEach(trac => {
+                    console.log('data', data);
+
                     if (trac.tagId === data[0].tracker_id) {
                         // API
                         trac.setCrd((data[0].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                              (data[0].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
                         trac.setLocs(data, 0);
+                        // all ready
                         if (customer_ids_index === customer_ids.length) {
                             this.trackerLocsListener.unsubscribe();
-                            this.trackerListChanges.next();
+                            // this.trackerListChanges.next();
                             this.onLoaded.next(true);
                             this.onTest.next(this.mapStarted);
                          } else {
@@ -444,12 +449,14 @@ export class MapService {
         });
     }
 
+    // Historical Move Timer
     testMove() {
         clearInterval(this.serviceInterval);
         this.serviceInterval = setInterval(() => {
-            this.trackers.map(tracker => {
-                this.testMoveHis(tracker);
+            this.trackers.map((tracker, index) => {
+                this.testMoveHis(tracker, index);
             });
+            console.log(this.sysTime);
             this.trackerLocChanges.next(this.trackers.slice());
         }, 800);
     }
@@ -460,14 +467,23 @@ export class MapService {
      * Eventually this.base.width should eqaul to trackerBoundary.x
      *  this.base.height should eqaul to trackerBoundary.y
      *
+     * TODO
      */
-    testMoveHis(tracker: Tracker) {
+
+     // Historical Time
+    testMoveHis(tracker: Tracker, index: number) {
+
         const nextLocIndex = tracker.currentLoc < tracker.locs.length ? tracker.currentLoc + 1 : 0;
         const nextLoc = tracker.locs[nextLocIndex];
         tracker.currentLoc = nextLocIndex;
         tracker.setCrd((nextLoc.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
             (nextLoc.loc_y + 0.5)  / this.trackerBoundary.y * this.base.height);
-        tracker.setTime(nextLoc.time * 1000);
+        // tracker.setTime(nextLoc.time * 1000);
+        tracker.setTime(nextLoc.time );
+
+        if (index === 0) {
+            this.setSysTime(nextLoc.time);
+        }
         // this.trackerLocChanges.next(this.trackers.slice());
     }
 
