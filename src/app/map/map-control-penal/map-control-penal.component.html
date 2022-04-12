@@ -12,6 +12,7 @@
   <div [ngClass]="{'penal-body-folded': filterFolded, 'penal-body-unfolded': !filterFolded}" class="panel-body" >
     <br>
     <div class="row">
+
         <form #f="ngForm" >
         <!-- <div class="col-sm-3">
           <div class="search-grp">
@@ -22,7 +23,8 @@
                 </span>  
          </div>
         </div> -->
-        <div class="col-md-6 col-md-offset-3 col-sm-9 form-group"
+
+        <div class="col-md-3 col-sm-9 form-group"
             appClickOutside 
             (clickOutside)="onFilterFold()">
             
@@ -77,12 +79,12 @@
                               <option value="1">Only VIPs</option> 
                           </select>
                       </span>
-                    <span class="select-wrapper">
+                    <!-- <span class="select-wrapper">
                       <select required 
                       class="form-control filter-selection">
                           <option value="0">More filters</option> 
                       </select>
-                    </span>
+                    </span> -->
                     <span 
                     (click)="onFilterFold()" 
                     style="cursor:pointer;"
@@ -94,7 +96,14 @@
 
         </div>  
       </form> 
-        <div class="col-sm-3" align="right">
+      <div class="col-md-6 col-sm-9">
+        <div class="slidecontainer">
+          <!-- <p>initiated{{initiated}} started{{started}} strop{{stopped}}</p> -->
+          <input id="slider" type="range" min="1" max="100" [value]="0" #ranger [disabled]="!playBackMode" (input)="onSlide(ranger.value)">
+        </div>
+        
+      </div>
+      <div class="col-md-3 col-sm-3" align="right">
           
           <!-- <button class="btn btn-danger"  (click)='getHistory()'>test</button>
           <button class="btn btn-success" [disabled]="stopping" (click)='onStart()'>{{ started ? 'Pause' : 'Start'}}</button>
@@ -131,5 +140,6 @@
       
           
         </div>
+
     </div>
   </div>

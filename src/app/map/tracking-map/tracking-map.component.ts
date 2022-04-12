@@ -108,11 +108,13 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     this.popupSubscription.unsubscribe();
     this.loadingStatusSubscription.unsubscribe();
     this.windowResizeSubscription.unsubscribe();
+    this.mapService.closeEventSource();
     clearTimeout(this.mapPosControlTimer);
     clearInterval(this.mapPosControlInterval);
   }
 
   onStop() {
+    console.log('onstop');
     if (this.mapService.mapStarted) {
       this.onPopup('Map Stopped');
       this.onPopupFade(true);
@@ -127,37 +129,45 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     if (this.onHidedSubscription) {
       this.onHidedSubscription.unsubscribe();
     }
+    if (this.mapService.sse$) {
+      this.mapService.sse$.unsubscribe();
+    }
 
     this.removeTrackerInfo();
     this.removePoint();
   }
 
+  // realtime mode
   onStart() {
+
     this.mapService.mapStopped = false;
     this.mapService.stopped.next(false);
     if (!this.mapService.mapInitiated) {
-      this.mapService.mapInitiated = true;
-      // button observable
-      this.mapService.intiated.next(true);
+      console.log('real-time start/init');
+      // this.mapService.mapInitiated = true;
+      // // button observable
+      // this.mapService.intiated.next(true);
       this.trackers = this.mapService.getTrackers();
       this.initiateTrackPoint(this.trackers);
-      this.mapService.move();
+      // this.mapService.move();
     }
 
     if (this.mapService.mapStarted) {
+      console.log('real-time pause');
       this.mapService.mapStarted = false;
       this.mapService.started.next(false);
       this.trackersChangeSubscription.unsubscribe();
       this.mapService.pause();
     } else {
+      console.log('real-time resume/start');
       this.mapService.mapStarted = true;
       this.mapService.started.next(true);
       this.mapService.move();
       this.trackersChangeSubscription = this.mapService.trackerLocChanges.subscribe(
-        (trackers: Tracker[]) => {
+        ({trackers, dur}) => {
           // console.log(this.trackers[0].xCrd);
-          this.trackers = trackers;
-          this.refreshTrackers();       // FIXME solove muttable copy issue;
+          // this.refreshTrackers();       // FIXME solove muttable copy issue;
+          this.trackers = [...trackers];
           this.movePoint(this.trackers);
         }
       );
@@ -175,24 +185,26 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     this.mapService.mapStopped = false;
     this.mapService.stopped.next(false);
     if (!this.mapService.mapInitiated) {
-      this.mapService.mapInitiated = true;
-      this.mapService.intiated.next(true);
+      console.log('historical start/initiate');
       this.trackers = this.mapService.getTrackers();
       this.initiateTrackPoint(this.trackers);
-      this.mapService.testMove();
     }
-    if (this.mapService.mapStarted) {
+    if (this.mapService.mapStarted) {           // pulse
+      console.log('historical  pause');
       this.mapService.mapStarted = false;
       this.mapService.started.next(false);
       this.trackersChangeSubscription.unsubscribe();
-    } else {
+      this.mapService.pause();
+    } else {                                     // resume  pulse + first start
+      this.mapService.testMove();
+      console.log('historical resume/start');
       this.mapService.mapStarted = true;
       this.mapService.started.next(true);
       this.trackersChangeSubscription = this.mapService.trackerLocChanges.subscribe(
-        (trackers: Tracker[]) => {
-          this.trackers = trackers;
-          this.refreshTrackers();       // FIXME solove muttable copy issue;
-          this.movePoint(this.trackers);
+        ({trackers, dur}) => {
+          this.trackers = [...trackers];
+          // this.refreshTrackers();       // FIXME solove muttable copy issue;
+          this.movePoint(this.trackers, dur);
         }
       );
     }
@@ -401,7 +413,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
       .attr('cy', d => this.yScale(d.yCrd)  + this.padding.top)
       .style('cursor', 'pointer')
       .transition()
-      .duration(700)
+      .duration(400)
       .ease(d3.easeQuadOut)
       .attr('r', d => d.isActivated() ? 5 : 0)
       .style('fill-opacity', 0.7)
@@ -409,6 +421,9 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
       .style('stroke', 'white')
       .style('stroke-opacity', 0.5)
       .style('stroke-width', 2);
+
+      this.mapService.mapInitiated = true;
+      this.mapService.intiated.next(true);      // panel related
   }
 
   movePoint(trackers: Tracker[], dur = 1000) {
@@ -422,9 +437,10 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     .attr('cy', d => this.yScale(d.yCrd));
 
     if (this.mapService.mapStarted && this.trackerInfoG && this.selectedPoint ) {
-      const x = this.selectedPoint.datum().xCrd;
-      const y = this.selectedPoint.datum().yCrd;
-      this.trackerInfoG.select('.trackerInfoText').text(d => `${d.alias} (${Math.floor(x)}, ${Math.floor(y)})`);
+      const data = this.selectedPoint.datum();
+      const x = data.xCrd;
+      const y = data.yCrd;
+      this.trackerInfoG.select('.trackerInfoText').text(d => `${data.alias} (${Math.floor(x)}, ${Math.floor(y)})`);
       this.trackerInfoG
       // .datum(this.selectedPoint.datum())
        .transition()
@@ -952,7 +968,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     const draggerLines = this.mapScaleControlPanel.insert('g')
     .attr('class', 'mapScaleDragger')
     .style('cursor', 'pointer');
-    
+
     draggerLines.append('line')
     .attr('id', 'mapScaleControlLineSlot')
     .attr('x1',          this.mapScaleControlPanelSize.width / 2)
@@ -960,12 +976,12 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     .attr('y1',         this.mapScaleControlPanelSize.paddingTop)
     .attr('y2',         this.mapScaleControlPanelSize.height - this.mapScaleControlPanelSize.paddingBottom)
     .attr('stroke',     'black')
-    .attr('stroke-width',    3)
+    .attr('stroke-width',    3);
     // .style('fill-opacity', .6)
 
     // this.mapPosScale.scale = (y) / ((this.mapScaleControlPanelSize.height) / 2);
 
-    const y = this.mapPosScale.scale  * ((this.mapScaleControlPanelSize.height) / 2)
+    const y = this.mapPosScale.scale  * ((this.mapScaleControlPanelSize.height) / 2);
     this.draggerActiveLine = draggerLines
     .append('line')
     .attr('id', 'mapScaleControlLineActive')
@@ -995,7 +1011,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
   .on('mouseout', function(d, i) {
     const dragger = d3.select(this);
     that.onMouseoutDragger(dragger);
-  })
+  });
   // .on('mousedown', function(d, i) {
   //   const dragger = d3.select(this);
   //   that.onMouseClickDragger(dragger);
@@ -1021,11 +1037,11 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     .attr('r', 7);
   }
 
-  scaleDragged(d) {
+  scaleDragged(d: any) {
     this.scaleDragger
-    .attr('cy', d => this.calDraggerHeight(d));
+    .attr('cy', (d) => this.calDraggerHeight(d));
     this.draggerActiveLine
-    .attr('y1', d => this.calDraggerHeight(d));
+    .attr('y1', (d) => this.calDraggerHeight(d));
 
     this.initMapScale();
     const element = this.chartContainer.nativeElement;

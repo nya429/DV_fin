@@ -4,6 +4,7 @@ import { Component, OnInit, OnDestroy, Input, ViewChild, Renderer2, ElementRef, 
 
 import { Tracker } from './../../../shared/tracker.model';
 import { MapService } from '../../map.service';
+import { t } from '@angular/core/src/render3';
 
 @Component({
   selector: 'app-tracker-list-item',
@@ -74,7 +75,11 @@ export class TrackerListItemComponent implements OnInit, OnDestroy, AfterViewChe
 
   onSubmit(form: NgForm) {
     this.editMode = false;
-    this.alias = form.value.alias;
+    if (this.alias !== form.value.alias) {
+      this.alias = form.value.alias;
+      this.mapService.updateTrackerInfo(this.index, form.value)
+    }
+    
     if ( this.color !==  form.value.color) {
       this.color = form.value.color;
       this.mapService.onChangeTrackerColor(this.id, this.color);

@@ -50,9 +50,10 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
     this.trackerListChangeSubscription = this.mapService.trackerListChanges.subscribe(() => {
       this.setTrackerDetail(null);
     });
-    this.trackerLocChangeSubscription = this.mapService.trackerLocChanges.subscribe(data => {
-        const time = this.editedTrackerIndex ? this.mapService.getTrackerTime(this.editedTrackerIndex) : null;
-        this.time = time;
+    this.trackerLocChangeSubscription = this.mapService.trackerLocChanges.subscribe(({trackers, dur}) => {
+        // const data = trackers;
+        this.time = this.editedTrackerIndex ? this.mapService.getTrackerTime(this.editedTrackerIndex) : null;
+        this.fullName =  this.editedTrackerIndex ? this.mapService.getTrackerAlias(this.editedTrackerIndex) : null;
         this.timeCurrent = this.tracker && this.tracker.locs && this.tracker.locs.length > 0 ?
         this.tracker.locs[this.tracker.currentLoc].time - this.tracker.locs[0].time : 0;
     });
@@ -76,6 +77,7 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
   }
 
   onUpdate(form: NgForm) {
+    console.log('onupdate in detail');
     const value = form.value;
     this.mapService.updateTrackerInfo(this.editedTrackerIndex, value);
     // this.alia = value.alias;

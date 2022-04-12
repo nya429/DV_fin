@@ -21,8 +21,10 @@ export class MapControlPenalComponent implements OnInit, OnDestroy {
   private onStoppingSubscription: Subscription;
   private onCompanySelectedSubscription: Subscription;
   private dropdownSubscription: Subscription;
+  private sliderSubscription: Subscription;
   // @ViewChild('penal') private penal: ElementRef;
   @ViewChild('f') filterForm: NgForm;
+  @ViewChild('ranger') slider: ElementRef;
   started: boolean;
   initiated: boolean;
   stopped: boolean;
@@ -59,6 +61,7 @@ export class MapControlPenalComponent implements OnInit, OnDestroy {
     //     this.onInputBlur();
     //    } });
     this.dropdownSubscription = this.mapService.dropdownFolded.subscribe(folded => this.dropdownFolded = folded);
+    this.sliderSubscription = this.mapService.sliderSubject.subscribe(p => this.playSlider(p));
   }
 
   ngOnDestroy() {
@@ -68,6 +71,7 @@ export class MapControlPenalComponent implements OnInit, OnDestroy {
     this.onStoppingSubscription.unsubscribe();
     // this.onCompanySelectedSubscription.unsubscribe();
     this.dropdownSubscription.unsubscribe();
+    this.sliderSubscription.unsubscribe();
   }
 
   onStart() {
@@ -75,11 +79,13 @@ export class MapControlPenalComponent implements OnInit, OnDestroy {
       return false;
     }
     if (this.playBackMode) {
+      console.log('ControlPanel start() history?', this.started);
       this.mapService.testHistoryLocals();
     } else {
      // dummy move
     //  this.mapService.start();
      // real-time move, table: simulation_2
+     console.log('ControlPanel start() realtime?', this.started);
      this.mapService.startSync();
     }
   }
@@ -147,5 +153,17 @@ export class MapControlPenalComponent implements OnInit, OnDestroy {
     if (this.stopped) {
       this.playBackMode = !this.playBackMode;
     }
+  }
+
+  onSlide(e) {
+    this.mapService.changeSliderP(e);
+  }
+
+  getSliderP() {
+    return this.mapService.getSlideP();
+  }
+
+  playSlider(p) {
+    this.slider.nativeElement.value = p;
   }
 }

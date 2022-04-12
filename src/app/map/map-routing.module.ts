@@ -10,7 +10,7 @@ const mapRoutes: Routes = [
     {path: '',
         component: MapComponent,
         children: [
-            {path: '', redirectTo: 'tracker', pathMatch: 'full'},
+            {path: '', redirectTo: 'barchart', pathMatch: 'full'},
             {path: 'barchart', component: MapDemoComponent},
             {path: 'tracker',
              component: TrackerDetailComponent,

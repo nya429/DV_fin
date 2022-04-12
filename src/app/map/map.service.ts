@@ -3,7 +3,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 
 import { Subject } from 'rxjs/Subject';
-
+import {  Observable } from 'rxjs/Observable';
 import { Tracker } from '../shared/tracker.model';
 import { SettingService } from './../setting/setting.service';
 import { Subscription } from 'rxjs/Subscription';
@@ -32,7 +32,7 @@ export class MapService {
      }
 
 
-    trackerLocChanges = new Subject<Tracker[]>();
+    trackerLocChanges = new Subject<{trackers: Tracker[], dur: number}>();
     trackerListChanges = new Subject<Tracker[]>();
     serviceInterval: any;
 
@@ -49,6 +49,7 @@ export class MapService {
     onStopped = new Subject<boolean>();
     onLoading = new Subject<boolean>();
     onLoaded = new Subject<boolean>();
+    onPaused = new Subject<boolean>();
     dropdownFolded = new Subject<boolean>();
 
     pageBlur = new Subject<boolean>();
@@ -64,9 +65,21 @@ export class MapService {
     // tracker history local
     trackerLocsReady = new Subject<any> ();
     trackerLocsListener: Subscription;
+
+    sse$: Subscription;
+    eventSource: EventSource;
+    realTimeSubject = new Subject<any>();
+    playbackTimer: any;
+
     trackerLocsSet = [];
     onTest = new EventEmitter<boolean>();
+    
+    sliderSubject  = new Subject<number>();
     sysTime: any;
+    minP: number;
+    maxP: number;
+    curP: number;
+
     // TODO those are participants
     private trackers: Tracker[];
     // dummy move
@@ -75,7 +88,7 @@ export class MapService {
         [-1, -0], [0, 0], [1, 0],
         [-1, 1], [0, 1], [1, 1]
     ];
-
+    private SSECheck: any;
     /**
      * base
      * tracker boundary
@@ -125,10 +138,23 @@ export class MapService {
     }
 
     start() {
+        console.log('am I ever called?');
         this.onStarted.next(this.mapStarted);
     }
 
     startSync() {
+        console.log('startSync', this.mapStarted);
+        if (this.mapStarted) {
+            console.log('already start emit1');
+            this.onStarted.next(this.mapStarted);
+            return;
+        }
+
+        if (this.mapInitiated) {
+            console.log('already start emit2');
+            this.onStarted.next(this.mapStarted);
+            return;
+        }
         // change table name: simulation_2 accordingly;
         this.getLastActiveTrackers();
         this.onLoading.next(true);
@@ -136,43 +162,54 @@ export class MapService {
             listChangeSub.unsubscribe();
 
             const customer_ids =  this.trackers.map(tracker => tracker.tagId);
-            console.log(customer_ids);
-            // this.trackerLocsListener = this.trackerLocsReady.subscribe(data => {
-            //     this.trackerLocsListener.unsubscribe();
+            this.getLocationRealTime();
+            this.sse$ = this.realTimeSubject.subscribe(data => {
+                this.sse$.unsubscribe();
+                const locations = JSON.parse(data);
+                this.trackers.forEach(trac => {
+                    const location = locations.find((loc: any) => loc.tracker_id === trac.tagId);
+                    trac.setCrd((location.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
+                        (location.loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
+                });
 
-            //     this.trackers.forEach(trac =>
-            //         trac.setCrd((data[trac['customer_id']].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
-            //         (data[trac['customer_id']].loc_y + 0.5) / this.trackerBoundary.y * this.base.width));
-
-            //         //Whenever get the trackers, ready to call
+                this.onLoaded.next(true);
+                console.log('onStarted 167');
+                this.onStarted.next(this.mapStarted);
+            });
+            // this.getParticipantLocalsByIds(customer_ids).subscribe(
+            //     (result) => {
+            //       const data = result['data'];
+            //       this.trackers.forEach(trac => {
+            //           console.log(trac);
+            //         //   console.log(data,data[`${trac.tagId}`])
+            //         trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
+            //         (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
+            //       });
+            //         // Whenever get the trackers, ready to call
             //         this.onLoaded.next(true);
             //         this.onStarted.next(this.mapStarted);
+            //     }, (err: HttpErrorResponse)  => {
+            //       console.error(err);
             //     }
             // );
-
-            this.getParticipantLocalsByIds(customer_ids).subscribe(
-                (result) => {
-                  const data = result['data'];
-                  this.trackers.forEach(trac => {
-                      console.log(trac);
-                    //   console.log(data,data[`${trac.tagId}`])
-                    trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
-                    (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
-                  });
-                    // Whenever get the trackers, ready to call
-                    this.onLoaded.next(true);
-                    this.onStarted.next(this.mapStarted);
-                }, (err: HttpErrorResponse)  => {
-                  console.error(err);
-                }
-            );
         });
     }
 
     pause() {
+ 
         if (this.trackerLocsListener) {
             this.trackerLocsListener.unsubscribe();
         }
+
+        if (this.serviceInterval) {
+            console.log('clearInterval');
+            clearInterval(this.serviceInterval);
+        }
+
+        if (this.sse$) {
+            this.sse$.unsubscribe();
+        }
+        this.onPaused.next();
     }
 
 
@@ -188,6 +225,7 @@ export class MapService {
         this.stopping.next(this.mapStopping);
         this.mapStarted = false;
         this.started.next(this.mapStarted);
+        // this.onStarted.next(this.mapStarted);
         this.mapStopped = true;
         this.stopped.next(this.mapStopped);
         this.mapInitiated = false;
@@ -196,7 +234,10 @@ export class MapService {
 
     stopService() {
         this.resetServiceState();
-        clearInterval(this.serviceInterval);
+        this.closeEventSource();
+        if (this.serviceInterval) {
+            clearInterval(this.serviceInterval);
+        }
     }
 
     getTrackers() {
@@ -214,18 +255,51 @@ export class MapService {
         return null;
     }
 
-    move() {
-        clearInterval(this.serviceInterval);
-        this.serviceInterval = setInterval(() => {
-            // dunmmyMove
-            // this.trackers.map(tracker => {
-            //     this.dummyMove(tracker);
-            // });
-            // this.trackerLocChanges.next(this.trackers.slice());
+    getTrackerAlias(index: number) {
+        if (this.trackers.slice()[index].alias) {
+            return this.trackers.slice()[index].alias;
+        }
+        return null;
+    }
 
-            // realMove
-            this.realtimeMove();
-        }, 800);
+
+    move() {
+        console.log('move()');
+        this.sse$ = this.realTimeSubject.subscribe(data => {
+            const locations = JSON.parse(data);
+            this.trackers.forEach(trac => {
+                const location = locations.find((loc: any) => loc.tracker_id === trac.tagId);
+                trac.setCrd((location.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
+                    (location.loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
+                trac.addLastLoc(location);
+            });
+            console.log('trackerLocChanges sse2');
+            this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
+        });
+        // clearInterval(this.serviceInterval);
+        // this.serviceInterval = setInterval(() => {
+        //     // dunmmyMove
+        //     // this.trackers.map(tracker => {
+        //     //     this.dummyMove(tracker);
+        //     // });
+        //     // this.trackerLocChanges.next(this.trackers.slice());
+
+        //     // realMove
+        //     this.realtimeMove();
+        // }, 800);
+    }
+
+    realtimeMove() {
+        const customer_ids = this.trackers.map(tracker => tracker.tagId);
+        this.getParticipantLocalsByIds(customer_ids).subscribe(
+           (result) => {
+             const data = result['data'];
+             this.trackers.forEach(trac =>
+               trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
+               (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width));
+               console.log(this.trackers[0]);
+               this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
+        });
     }
 
     dummyMove(tracker: Tracker) {
@@ -248,19 +322,6 @@ export class MapService {
         return tracker;
     }
 
-    realtimeMove() {
-        const customer_ids = this.trackers.map(tracker => tracker.tagId);
-        this.getParticipantLocalsByIds(customer_ids).subscribe(
-           (result) => {
-             const data = result['data'];
-             this.trackers.forEach(trac =>
-               trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
-               (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width));
-               console.log(this.trackers[0]);
-               this.trackerLocChanges.next(this.trackers.slice());
-        });
-    }
-
 　　onSelectedTracker(id: number) {
         this.selectedTrackerIndex.next(id);
     }
@@ -281,7 +342,7 @@ export class MapService {
             }
         );
         this.trackers = newTrackers;
-        this.trackerLocChanges.next(this.trackers.slice());
+        this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         this.hideTrackerIndex.next(id);
     }
 
@@ -290,9 +351,10 @@ export class MapService {
     }
 
     updateTrackerInfo(index: number, form: any) {
-        // TODO replace this after having backend
+        console.log('update', index, form.alias);
+        // TODO replace this after having backend;
         this.trackers[index].alias = form.alias;
-        this.trackerLocChanges.next(this.trackers.slice());
+        this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
     }
 
     getParticipantListByFilters(filters: object, offset?: number, limit?: number) {
@@ -349,7 +411,7 @@ export class MapService {
     getParticipantLocalsByTime(id: string, begin?: number, end?: number) {
         const urlSuffix = 'locations';
         const con = {'begin': begin, 'end': end, 'tracker_id': id};
-        console.log('DEBUG', con);
+        // console.log('DEBUG', con);
         return this.httpClient.post(`${this.httpOptions.eventUrl()}/${urlSuffix}`, con, {
             observe: 'body',
             responseType: 'json',
@@ -357,12 +419,32 @@ export class MapService {
           .subscribe(
               (result) => {
                 const data = result['data'];
-                console.log('DEBUG', 'getParticipantLocalsByTime', data);
+                // console.log('DEBUG', 'getParticipantLocalsByTime', data);
                 this.trackerLocsReady.next(data);
               }, (err: HttpErrorResponse)  => {
                 console.error(err);
               }
           );
+    }
+
+    public closeEventSource() {
+        if (!!this.eventSource) {
+           this.eventSource.close();
+        }
+    }
+
+    getLocationRealTime() {
+        this.closeEventSource();
+        const urlSuffix = 'real_time/simulate';
+        const url = `${this.httpOptions.eventUrl()}/${urlSuffix}`;
+        this.eventSource = new EventSource(url);
+
+        return Observable.create(observer => {
+            this.eventSource.onmessage = x => observer.next(x.data);
+            this.eventSource.onerror = x => observer.error(x);
+        }).subscribe(data => {
+            this.realTimeSubject.next(data);
+        });
     }
 
     getParticipantLocalsByIds(ids: string[], begin?: number, end?: number) {
@@ -386,7 +468,7 @@ export class MapService {
                 const trackers = result['data'];
                 console.log('DEBUG getLastActiveTracker', trackers);
                 if (trackers && trackers.length > 0) {
-                    this.stop();
+                    // this.stop();
                     this.changeTrackers(trackers);
                 } else {
                     this.onLoaded.next(false);
@@ -407,7 +489,17 @@ export class MapService {
     testHistoryLocals() {
         // map particiapnt id, pass the id
         // TODO put getLastActive under subscribe
-        this.getLastActiveTrackers();
+        console.log('testHistoryLocals', this.mapStarted);
+        if (this.mapStarted) {
+            this.onTest.next(this.mapStarted);
+            return;
+        }
+
+        if (this.mapInitiated) {
+            this.onTest.next(this.mapStarted);
+            return;
+        }
+        this.getLastActiveTrackers();   // =>  this.changeTrackers(trackers);  => trackerListChanges
         this.onLoading.next(true);
         const listChangeSub = this.trackerListChanges.subscribe(() => {
             listChangeSub.unsubscribe();
@@ -417,8 +509,6 @@ export class MapService {
             let customer_ids_index = 1;
             this.trackerLocsListener = this.trackerLocsReady.subscribe(data => {
                 this.trackers.forEach(trac => {
-                    console.log('data', data);
-
                     if (trac.tagId === data[0].tracker_id) {
                         // API
                         trac.setCrd((data[0].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
@@ -426,6 +516,9 @@ export class MapService {
                         trac.setLocs(data, 0);
                         // all ready
                         if (customer_ids_index === customer_ids.length) {
+                            this.minP = 1;
+                            this.maxP = data.length;
+
                             this.trackerLocsListener.unsubscribe();
                             // this.trackerListChanges.next();
                             this.onLoaded.next(true);
@@ -456,8 +549,8 @@ export class MapService {
             this.trackers.map((tracker, index) => {
                 this.testMoveHis(tracker, index);
             });
-            console.log(this.sysTime);
-            this.trackerLocChanges.next(this.trackers.slice());
+            // console.log(this.sysTime);
+            this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         }, 800);
     }
 
@@ -483,13 +576,46 @@ export class MapService {
 
         if (index === 0) {
             this.setSysTime(nextLoc.time);
+            this.playSliderP(nextLocIndex);
         }
         // this.trackerLocChanges.next(this.trackers.slice());
     }
 
+    setSliderP(p: number): void {
+        this.curP = Math.floor(p / this.maxP * 100);
+    }
+
+    playSliderP(p: number): void {
+        this.setSliderP(p);
+        this.sliderSubject.next(this.curP);
+    }
+
+    changeSliderP(p): void {
+        const index = this.getSliderIndex(p);
+
+        this.trackers.map((tracker) => {
+            tracker.currentLoc = index;
+            const nextLoc = tracker.locs[index];
+            tracker.setCrd((nextLoc.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
+            (nextLoc.loc_y + 0.5)  / this.trackerBoundary.y * this.base.height);
+            // tracker.setTime(nextLoc.time * 1000);
+            tracker.setTime(nextLoc.time );
+        });
+        // console.log(this.sysTime);
+        this.trackerLocChanges.next({trackers: [...this.trackers], dur: 0});
+    }
+
+    getSlideP(): number {
+        return this.curP ? 1 : this.curP;
+    }
+
+    getSliderIndex(p: number) {
+        return Math.ceil(this.maxP * p / 100);
+    }
+
     onChangeTrackerColor(id: number, color: string) {
         this.trackers[id - 1].setColor(color);
-        this.trackerLocChanges.next(this.trackers.slice());
+        this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
     }
 
     onLeavePage() {

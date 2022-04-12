@@ -29,8 +29,8 @@ export class Tracker {
         this.alias = participant ? participant.firstName[0] + '.' + participant.lastName : 'Tracker#' + tag_id;
         // this.note = 'This is a tracker';
         this.color = this.participant && this.participant.priorityStatus ?
-        (this.participant.priorityStatus === 1 ? 'orange' : 'deepskyblue') :
-         'deepskyblue';
+            (this.participant.priorityStatus === 1 ? 'orange' : 'deepskyblue') :
+            'deepskyblue';
     }
 
     setCrd(x: number, y: number) {
@@ -60,6 +60,15 @@ export class Tracker {
     setLocs(locs: [object], currentLoc: number) {
         this.locs = locs;
         this.currentLoc = currentLoc;
+    }
+
+    addLastLoc(loc: Object) {
+        if (!!this.locs && this.locs.length !== 0) {
+            this.locs = [...this.locs, loc];
+        } else {
+            this.locs = [loc];
+        }
+        this.currentLoc = this.locs.length - 1;
     }
 
     setColor(color: string) {
