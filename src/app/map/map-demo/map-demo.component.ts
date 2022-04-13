@@ -32,68 +32,82 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   private minMaxY = 6;
   private rectBar: any;
   private texts: any;
-  private timer: any;
+  // private timer: any;
   private xz: any;
 
-  private onStartSubscription: Subscription;
-  private onStopSubscription: Subscription;
-  private onTestSubscription: Subscription;
-  private onPauseSubscription: Subscription;
+  // private onStartSubscription: Subscription;
+  // private onStopSubscription: Subscription;
+  // private onTestSubscription: Subscription;
+  // private onPauseSubscription: Subscription;
+  private ononAccZone$: Subscription;
 
-  private chartStarted = false;
+  // private chartStarted = false;
 
   constructor(private mapService: MapService) { }
 
   ngOnInit() {
+    this.dataset =  this.mapService.getAccVisit();
     this.initBase();
     this.initChart();
-    this.onStartSubscription = this.mapService.started.subscribe(d => this.onStart(d));
-    this.onStopSubscription = this.mapService.onStopped.subscribe(d => this.onStop(d));
-    // this.onTestSubscription = this.mapService.onTest.subscribe(d => this.onTest(d));
-    this.onPauseSubscription = this.mapService.onPaused.subscribe(d => this.onPause(d));
+    setTimeout(() => {
+      this.ononAccZone$ = this.mapService.onAccVisit.subscribe(d => this.onAccZone(d));
+    }, 1000);
 
-    if (this.mapService.mapStarted) {
-      this.startChart();
-    }
+    // this.onStartSubscription = this.mapService.started.subscribe(d => this.onStart(d));
+    // this.onStopSubscription = this.mapService.onStopped.subscribe(d => this.onStop(d));
+    // this.onTestSubscription = this.mapService.onTest.subscribe(d => this.onTest(d));
+    // this.onPauseSubscription = this.mapService.onPaused.subscribe(d => this.onPause(d));
+
+    // if (this.mapService.mapStarted) {
+    //   this.startChart();
+    // }
   }
 
   ngOnDestroy(): void {
-    this.onStartSubscription.unsubscribe();
-    this.onStopSubscription.unsubscribe();
+    // this.onStartSubscription.unsubscribe();
+    // this.onStopSubscription.unsubscribe();
     // this.onTestSubscription.unsubscribe();
-    this.onPauseSubscription.unsubscribe();
-    this.clearTimer();
-  }
-
-  onStart(d: boolean): void {
-    console.log('onStart', d);
-    if (!d && !this.chartStarted) {
-      return;
+    // this.onPauseSubscription.unsubscribe();
+    if (this.ononAccZone$) {
+      this.ononAccZone$.unsubscribe();
     }
-    this.startChart();
+    // this.clearTimer();
   }
 
-  startChart() {
-    this.clearTimer();
-    this.timer = setInterval(() => {
-      this.rnadomData();
-      this.updateChart();
-    }, 1000);
+  // onStart(d: boolean): void {
+  //   console.log('onStart', d);
+  //   if (!d && !this.chartStarted) {
+  //     return;
+  //   }
+  //   this.startChart();
+  // }
 
-    this.chartStarted = true;
+  onAccZone(d: number[]) {
+    this.dataset = [...d];
+    this.updateChart();
   }
 
-  onStop(d: boolean): void {
-    console.log('onStop');
-    this.chartStarted = false;
-    this.clearTimer();
-  }
+  // startChart() {
+  //   this.clearTimer();
+  //   this.timer = setInterval(() => {
+  //     this.rnadomData();
+  //     this.updateChart();
+  //   }, 1000);
 
-  onPause(d: boolean): void {
-    console.log('onPause');
-    this.chartStarted = false;
-    this.clearTimer();
-  }
+  //   this.chartStarted = true;
+  // }
+
+  // onStop(d: boolean): void {
+  //   console.log('onStop');
+  //   this.chartStarted = false;
+  //   this.clearTimer();
+  // }
+
+  // onPause(d: boolean): void {
+  //   console.log('onPause');
+  //   this.chartStarted = false;
+  //   this.clearTimer();
+  // }
 
   // onTest(d: boolean): void {
   //   console.log('pause')
@@ -108,12 +122,12 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   //   this.chartStarted = true;
   // }
 
-  clearTimer(): void {
-    if (this.timer) {
-      console.log('cleared');
-      clearInterval(this.timer);
-    }
-  }
+  // clearTimer(): void {
+  //   if (this.timer) {
+  //     console.log('cleared');
+  //     clearInterval(this.timer);
+  //   }
+  // }
 
   resetChart(): void {
 
@@ -178,6 +192,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
           node.textContent = i(t).toFixed(1);
         };
       })
+      .attr('fill', 'white')
       // .attr('dx', () => (this.xScale.bandwidth() - 30 - this.rectPadding) / 2)
       .attr('y', d => this.yScale(d) + this.padding.top)
       // .transition()
@@ -209,17 +224,17 @@ export class MapDemoComponent implements OnInit, OnDestroy {
     };
   }
 
-  getRandomInt(min, max): number {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
+  // getRandomInt(min, max): number {
+  //   min = Math.ceil(min);
+  //   max = Math.floor(max);
+  //   return Math.floor(Math.random() * (max - min)) + min;
+  // }
 
-  rnadomData() {
-    const randIndx = this.getRandomInt(0, 4);
-    const randSeed = this.getRandomInt(1, 3);
-    this.dataset[randIndx] += randSeed;
-  }
+  // rnadomData() {
+  //   const randIndx = this.getRandomInt(0, 4);
+  //   const randSeed = this.getRandomInt(1, 3);
+  //   this.dataset[randIndx] += randSeed;
+  // }
 
   initBase(): void {
     this.baseElement = this.chartContainer.nativeElement;

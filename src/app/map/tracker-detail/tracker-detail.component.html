@@ -1,107 +1,98 @@
-
-      <div class="row">
-          <div *ngIf="!editMode && tracker" class="col-md-12 col-lg-12 " align="right">
+<div class="row">
+  <!-- <div *ngIf="!editMode && tracker" class="col-md-12 col-lg-12 " align="right">
                 <a  title='edit' type="button" class="btn btn-sm btn-warning" (click)="onEdit()"><i class="glyphicon glyphicon-edit"></i></a>
-          </div>
-          <div *ngIf="editMode" class="col-md-12 col-lg-12 " align="right">
+          </div> -->
+  <!-- <div *ngIf="editMode" class="col-md-12 col-lg-12 " align="right">
             <a  title='submit' type="submit" class="btn btn-sm btn-success" (click)="onUpdate(f)"><i class="glyphicon glyphicon-ok"></i></a>
             <a  title='edit' type="button" class="btn btn-sm btn-danger" (click)="onCancle()"><i class="glyphicon glyphicon-remove"></i></a>
-          </div>
-          <div class="col-md-3 col-lg-3 " align="center"> 
-            <div class="row">
-              <img alt="trackerImg" 
-                  src="../assets/tracker-img.svg"
-                  class="img-circle img-responsive tracker-img"> 
-              <a *ngIf="editMode" title='upload Image' type="button" class="btn editImg"><i class="glyphicon glyphicon-edit"></i></a>
-           </div>
-            <br>
-            <div class="row">
+          </div> -->
+  <div class="col-md-3 col-lg-3" align="center">
+    <div class="row">
+      <br>
+      <app-map-pie editedTrackerIndex="editedTrackerIndex"></app-map-pie>
+      <!-- <a *ngIf="editMode" title='upload Image' type="button" class="btn editImg"><i class="glyphicon glyphicon-edit"></i></a> -->
+    </div>
+    <!-- <br> -->
+    <!-- <div class="row">
                 <div class="col-md-6 col-lg-6 " align="right"> 
                   <p><span title="Signal" class="fa fa-signal"></span></p> 
                 </div> 
                 <div class="col-md-6 col-lg-6 " align="left"> 
                     <p><span title="Battery" class="fa fa-battery-4"></span></p> 
                 </div>            
-            </div>
-         </div>
-          <div class=" col-md-9 col-lg-9 "> 
-            <table class="table" *ngIf="!editMode">
-              <thead>
-                  <tr>
-                  
-                        <h4 class="detail-name">{{ fullName }}</h4> 
-                        <span> {{ participant?.priorityStatus | priorityStatus}}</span>
-                    
-                  
-                    <td class='detail-time'>{{ time | date:'MM/d/y HH:mm:ss'}}</td>
-                  </tr>
-                <div >
-                   
-                </div>
-              </thead>
-              <tbody>
-                <br>
-                <tr>
-                  <td class='td-title'>Tracker-ID :</td>
-                  <td class='td-value'>#{{ tagId }}</td>
-                  <td class='td-title'>Name :</td>
-                  <td class='td-value'>{{ fullName }}</td>
-                </tr>
-                <tr>
-                    <td class='td-title'>Status :</td>
-                    <td class='td-value'>Stable</td>
-                    <td class='td-title'>Company :</td>
-                    <td class='td-value'>{{ participant?.companyName }}</td>
-                </tr>
-                <tr>
-                    <td class='td-title'>Online time :</td>
-                    <td class='td-value'>{{ toHHMMSS(timeCurrent) }} / {{ toHHMMSS(timeTotal) }}</td>
-                    <td class='td-title'>Job title :</td>
-                    <td class='td-value'>{{ participant?.jobTitle }}</td>
-                </tr>
-               
-              </tbody>
-            </table>
-            <form  #f="ngForm">
-            <table class="table" *ngIf="editMode">
-                <tbody>
-                  <br>
-                  <tr>
-                    <td class='td-title'>Tracker-ID :</td>
-                    <td class='td-value'>#{{ tagId }}</td>
-                    <td class='td-title'>Name :</td>
-                    <td class='td-value'>
-                        <input 
-                        type="text" 
-                        id="tracker-alias" 
-                        class="form-control"
-                        [ngModel]='name'
-                        name="alias"
-                        maxlength="20"
-                       >
-                    </td>
-                  </tr>
-                  <tr>
-                      <td class='td-title'>Status :</td>
-                      <td class='td-value'>Stable</td>
-                      <td class='td-title'>Gender :</td>
-                      <td class='td-value'>N/A</td>
-                  </tr>
-                  <tr>
-                      <td class='td-title'>Online time :</td>
-                      <td class='td-value'>02h:13m</td>
-                      <td class='td-title'>Departmnet :</td>
-                      <td class='td-value'>N/A</td>
-                  </tr>
-                </tbody>
-          
-              </table>
-            </form>
-            <div>
+            </div> -->
+  </div>
+  <div class="col-md-9 col-lg-9">
+    <table class="table" *ngIf="!editMode">
+      <thead>
+        <tr>
+          <h4 class="detail-name">{{ fullName }}</h4>
+          <!-- <span> {{ participant?.priorityStatus | priorityStatus}}</span> -->
+          <td class="detail-time">{{ time | date: "MM/d/y HH:mm:ss" }}</td>
+        </tr>
+        <div></div>
+      </thead>
+      <tbody>
+        <br />
+        <tr>
+          <td class="td-title">Tracker-ID :</td>
+          <td class="td-value">#{{ tagId }}</td>
+          <td class="td-title">Name :</td>
+          <td class="td-value">{{ fullName }}</td>
+        </tr>
+        <tr>
+          <td class="td-title">Status :</td>
+          <td class="td-value">Stable</td>
+          <td class="td-title">Company :</td>
+          <td class="td-value">{{ participant?.companyName }}</td>
+        </tr>
+        <tr>
+          <td class="td-title">Online time :</td>
+          <td class="td-value">
+            {{ toHHMMSS(timeCurrent) }} / {{ toHHMMSS(timeTotal) }}
+          </td>
+          <td class="td-title">Job title :</td>
+          <td class="td-value">{{ participant?.jobTitle }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <form #f="ngForm">
+      <table class="table" *ngIf="editMode">
+        <tbody>
+          <br />
+          <tr>
+            <td class="td-title">Tracker-ID :</td>
+            <td class="td-value">#{{ tagId }}</td>
+            <td class="td-title">Name :</td>
+            <td class="td-value">
+              <input
+                type="text"
+                id="tracker-alias"
+                class="form-control"
+                [ngModel]="name"
+                name="alias"
+                maxlength="20"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td class="td-title">Status :</td>
+            <td class="td-value">Stable</td>
+            <td class="td-title">Gender :</td>
+            <td class="td-value">N/A</td>
+          </tr>
+          <tr>
+            <td class="td-title">Online time :</td>
+            <td class="td-value">02h:13m</td>
+            <td class="td-title">Departmnet :</td>
+            <td class="td-value">N/A</td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+    <!-- <div>
                 <a  class="btn btn-primary">Action</a>
                 <a  class="btn btn-primary">Action</a>
-            </div>
-          
-          </div>
-        </div>
-  
+            </div> -->
+  </div>
+</div>

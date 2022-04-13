@@ -73,12 +73,17 @@ export class MapService {
 
     trackerLocsSet = [];
     onTest = new EventEmitter<boolean>();
-    
+
     sliderSubject  = new Subject<number>();
     sysTime: any;
     minP: number;
     maxP: number;
     curP: number;
+
+    private testZoneData = [0, 0, 0, 0];
+    onAccVisit = new Subject<number[]>();
+    onTrackerAccVisit = new Subject<number[]>();
+    onInstantVisit = new Subject<number[]>();
 
     // TODO those are participants
     private trackers: Tracker[];
@@ -196,7 +201,6 @@ export class MapService {
     }
 
     pause() {
- 
         if (this.trackerLocsListener) {
             this.trackerLocsListener.unsubscribe();
         }
@@ -274,6 +278,8 @@ export class MapService {
                 trac.addLastLoc(location);
             });
             console.log('trackerLocChanges sse2');
+            this.rnadomData(); // REMOVE after API
+            this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         });
         // clearInterval(this.serviceInterval);
@@ -550,8 +556,49 @@ export class MapService {
                 this.testMoveHis(tracker, index);
             });
             // console.log(this.sysTime);
+            this.rnadomData();    // remove it after api finished
+            this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         }, 800);
+    }
+
+    emitChartData() {
+        this.accVisit();
+        this.accVisitByTracker();
+        this.instantZoneVisit();
+    }
+
+    accVisit() {
+        this.onAccVisit.next(this.testZoneData);
+    }
+
+    getAccVisit() {
+        return this.testZoneData;
+    }
+
+    accVisitByTracker() {
+        this.onTrackerAccVisit.next(this.testZoneData);
+    }
+
+    getAccVisitByTracker(tracker_idx: number): number[] {
+        return this.testZoneData;
+    }
+
+
+    instantZoneVisit() {
+        this.onInstantVisit.next();
+    }
+
+    getRandomInt(min, max): number {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    rnadomData() {
+        const randIndx = this.getRandomInt(0, 4);
+        const randSeed = this.getRandomInt(1, 3);
+        this.testZoneData[randIndx] += randSeed;
     }
 
     /**

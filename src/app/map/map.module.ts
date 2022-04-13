@@ -22,6 +22,8 @@ import { SearchResultListComponent } from './search-result-list/search-result-li
 import { FilterPriorityListComponent } from './filter-priority-list/filter-priority-list.component';
 import { FilterCompanyDropdownComponent } from './filter-company-dropdown/filter-company-dropdown.component';
 import { MapTooltipComponent } from './map-tooltip/map-tooltip.component';
+import { MapPieComponent } from './map-pie/map-pie.component';
+import { MapLineComponent } from './map-line/map-line.component';
 
 
 @NgModule({
@@ -39,7 +41,9 @@ import { MapTooltipComponent } from './map-tooltip/map-tooltip.component';
     SearchResultListComponent,
     FilterPriorityListComponent,
     FilterCompanyDropdownComponent,
-    MapTooltipComponent
+    MapTooltipComponent,
+    MapPieComponent,
+    MapLineComponent
   ],
   imports: [
     CommonModule,
