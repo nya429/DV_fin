@@ -290,13 +290,20 @@ export class MapService {
     move() {
         this.sse$ = this.realTimeSubject.subscribe(data => {
             const locations = JSON.parse(data);
-            this.trackers.forEach(trac => {
+            this.trackers.forEach((trac, idx) => {
                 const location = locations.find((loc: any) => loc.tracker_id === trac.tagId);
                 trac.setCrd((location.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                     (location.loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
                 trac.addLastLoc(location);
+                trac.setProductId(location.product_id);
+                trac.setTime(location.time );
+                if (idx === 0) {
+                    this.setSysTime(location.time);
+                }
             });
             console.log('trackerLocChanges sse2');
+
+            this.updateInstantVisit();
             this.rnadomData(); // REMOVE after API
             this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
@@ -580,7 +587,7 @@ export class MapService {
             this.rnadomData();    // remove it after api finished
             this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
-        }, 800);
+        }, 910);
     }
 
     emitChartData() {
@@ -607,11 +614,12 @@ export class MapService {
 
 
     instantVisit() {
-        this.onInstantVisit.next(this.insantVisitData);
+        this.onInstantVisit.next([...this.insantVisitData]);
     }
 
 
     updateInstantVisit() {
+        this.insantVisitData.shift();
         const instantVisit = {time: this.sysTime, visit: [0, 0, 0, 0]};
         this.trackers.forEach(trac => {
             const productId = trac.productId;
@@ -620,8 +628,10 @@ export class MapService {
             }
         });
 
-        this.insantVisitData.shift();
+
         this.insantVisitData.push(instantVisit);
+
+        console.log(this.insantVisitData.map(d => d['time']))
     }
 
     getInstantZoneVisit() {

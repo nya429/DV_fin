@@ -54,6 +54,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
   onInstantVisit(data: object[]) {
     this.dataset = this.parseData(data);
+    console.log(this.dataset[0].map(d => d.time))
     this.updateChart();
   }
 
@@ -68,10 +69,12 @@ export class MapLineComponent implements OnInit, OnDestroy {
     }
 
     this.instantData = data[data.length - 1]['visit'];
-    console.log(this.instantData);
+ 
     return d3.range(data[0]['visit'].length)
       .map(i =>
-        data.map(
+        data
+        .sort((a, b) => Date.parse(a['time']) - Date.parse(b['time']))
+        .map(
           (d: { time: any, visit: any }) => ({ 'time': d.time, 'visit': d.visit[i] })
         )
       );
@@ -205,9 +208,9 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
     this.xScale = d3.scaleTime()
       .range([0, this.width - this.padding.right])
-      .domain(d3.extent(this.dataset[0], (d, i) => Date.parse(d.time)));
-
-    console.log(d3.extent(this.dataset[0], (d, i) => Date.parse(d.time)));
+      .domain(d3.extent([...this.dataset[0]], (d, i) => Date.parse(d.time)));
+    // console.log(this.dataset[0])
+    // console.log(d3.extent(this.dataset[0], (d, i) => Date.parse(d.time)));
     // this.yScale.domain([min / 1.002, max * 1.002]);
     this.line
       .x(d => this.xScale(Date.parse(d.time)))
@@ -224,9 +227,10 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
     this.xAxisG
       .transition()
-      .duration(1100)
+      .duration(890)
       .ease(d3.easeLinear)
       .call(this.xAxis);
+      // .on('end', function (){setTimeout(animate);});;
 
 
     // this.lineG = this.svg.select('.g').append('g').attr('class', 'line-g')
@@ -246,7 +250,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
     this.lineG
       .transition()
-      .duration(1100)
+      .duration(1000)
       .ease(d3.easeLinear)
       .attr('d', this.line)
       // .style('stroke', 'LIGHTSEAGREEN')
@@ -256,7 +260,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
     this.legend.data(this.instantData).selectAll('g').data(d => d);
     this.legend
       .transition()
-      .duration(1100)
+      .duration(1000)
       .ease(d3.easeLinear)
       .attr('transform', d => 'translate(' + (this.width - this.padding.right + this.legendD.width / 3) + ','
         + (this.yScale(d) - this.legendD.height / 2) + ')');
