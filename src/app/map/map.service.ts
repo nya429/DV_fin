@@ -81,9 +81,28 @@ export class MapService {
     curP: number;
 
     private testZoneData = [0, 0, 0, 0];
+    private insantVisitData: object[] = [
+        // {time: '2017-12-31T23:59:45Z', visit: [0, 0, 0, 0]},
+        // {time: '2017-12-31T23:59:46Z', visit: [0, 0, 0, 0]},
+        // {time: '2017-12-31T23:59:47Z', visit: [0, 0, 0, 0]},
+        // {time: '2017-12-31T23:59:48Z', visit: [0, 0, 0, 0]},
+        // {time: '2017-12-31T23:59:49Z', visit: [0, 0, 0, 0]},
+        // {time: '2017-12-31T23:59:50Z', visit: [0, 0, 0, 0]},
+        // {time: '2017-12-31T23:59:51Z', visit: [0, 0, 0, 0]},
+        // {time: '2017-12-31T23:59:52Z', visit: [0, 0, 0, 0]},
+        {time: '2017-12-31T23:59:53Z', visit: [0, 0, 0, 0]},
+        {time: '2017-12-31T23:59:54Z', visit: [0, 0, 0, 0]},
+        {time: '2017-12-31T23:59:55Z', visit: [0, 0, 0, 0]},
+        {time: '2017-12-31T23:59:56Z', visit: [0, 0, 0, 0]},
+        {time: '2017-12-31T23:59:57Z', visit: [0, 0, 0, 0]},
+        {time: '2017-12-31T23:59:58Z', visit: [0, 0, 0, 0]},
+        {time: '2017-12-31T23:59:59Z', visit: [0, 0, 0, 0]},
+
+    ];
+
     onAccVisit = new Subject<number[]>();
     onTrackerAccVisit = new Subject<number[]>();
-    onInstantVisit = new Subject<number[]>();
+    onInstantVisit = new Subject<object[]>();
 
     // TODO those are participants
     private trackers: Tracker[];
@@ -175,6 +194,7 @@ export class MapService {
                     const location = locations.find((loc: any) => loc.tracker_id === trac.tagId);
                     trac.setCrd((location.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                         (location.loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
+                    trac.setProductId(location.product_id);
                 });
 
                 this.onLoaded.next(true);
@@ -268,7 +288,6 @@ export class MapService {
 
 
     move() {
-        console.log('move()');
         this.sse$ = this.realTimeSubject.subscribe(data => {
             const locations = JSON.parse(data);
             this.trackers.forEach(trac => {
@@ -410,7 +429,7 @@ export class MapService {
            return new Tracker(i + 1, tracker['tracker_id'], null, null, null);
         });
 
-        this.trackers = trackers.slice();
+        this.trackers = [...trackers];
         this.trackerListChanges.next();
     }
 
@@ -425,7 +444,7 @@ export class MapService {
           .subscribe(
               (result) => {
                 const data = result['data'];
-                // console.log('DEBUG', 'getParticipantLocalsByTime', data);
+                console.log('DEBUG', 'getParticipantLocalsByTime', data);
                 this.trackerLocsReady.next(data);
               }, (err: HttpErrorResponse)  => {
                 console.error(err);
@@ -519,6 +538,7 @@ export class MapService {
                         // API
                         trac.setCrd((data[0].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                              (data[0].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
+                        trac.setProductId(data[0].productId);
                         trac.setLocs(data, 0);
                         // all ready
                         if (customer_ids_index === customer_ids.length) {
@@ -555,6 +575,7 @@ export class MapService {
             this.trackers.map((tracker, index) => {
                 this.testMoveHis(tracker, index);
             });
+            this.updateInstantVisit();
             // console.log(this.sysTime);
             this.rnadomData();    // remove it after api finished
             this.emitChartData();
@@ -565,7 +586,7 @@ export class MapService {
     emitChartData() {
         this.accVisit();
         this.accVisitByTracker();
-        this.instantZoneVisit();
+        this.instantVisit();
     }
 
     accVisit() {
@@ -585,8 +606,26 @@ export class MapService {
     }
 
 
-    instantZoneVisit() {
-        this.onInstantVisit.next();
+    instantVisit() {
+        this.onInstantVisit.next(this.insantVisitData);
+    }
+
+
+    updateInstantVisit() {
+        const instantVisit = {time: this.sysTime, visit: [0, 0, 0, 0]};
+        this.trackers.forEach(trac => {
+            const productId = trac.productId;
+            if (productId > 0) {
+                instantVisit.visit[productId - 1] += 1;
+            }
+        });
+
+        this.insantVisitData.shift();
+        this.insantVisitData.push(instantVisit);
+    }
+
+    getInstantZoneVisit() {
+        return this.insantVisitData;
     }
 
     getRandomInt(min, max): number {
@@ -616,9 +655,12 @@ export class MapService {
         const nextLocIndex = tracker.currentLoc < tracker.locs.length ? tracker.currentLoc + 1 : 0;
         const nextLoc = tracker.locs[nextLocIndex];
         tracker.currentLoc = nextLocIndex;
+
         tracker.setCrd((nextLoc.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
             (nextLoc.loc_y + 0.5)  / this.trackerBoundary.y * this.base.height);
         // tracker.setTime(nextLoc.time * 1000);
+        // console.log(nextLoc.product_id)
+        tracker.setProductId(nextLoc.product_id);
         tracker.setTime(nextLoc.time );
 
         if (index === 0) {

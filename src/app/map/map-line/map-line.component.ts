@@ -1,155 +1,268 @@
-import { Component, OnInit, AfterViewInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { D } from '@angular/core/src/render3';
 import * as d3 from 'd3';
-
+import { Subscription } from 'rxjs/Subscription';
+import { MapService } from '../map.service';
 @Component({
   selector: 'app-map-line',
   templateUrl: './map-line.component.html',
   styleUrls: ['./map-line.component.css']
 })
-export class MapLineComponent implements OnInit {
+export class MapLineComponent implements OnInit, OnDestroy {
   @ViewChild('lineChart') private chartContainer: ElementRef;
 
-  private dataset = [
-    {'year' : '2011', 'value': 774100},
-    {'year' : '2012', 'value': 726700},
-    {'year' : '2013', 'value': 737100},
-    {'year' : '2014', 'value': 689200},
-    {'year' : '2015', 'value': 652300},
-    {'year' : '2016', 'value': 727100},
-    {'year' : '2017', 'value': 708200},
-];
 
-
-private dataset2 = [
-  {'year' : '2011', 'value': 671100},
-  {'year' : '2012', 'value': 684700},
-  {'year' : '2013', 'value': 711100},
-  {'year' : '2014', 'value': 724200},
-  {'year' : '2015', 'value': 745300},
-  {'year' : '2016', 'value': 774100},
-  {'year' : '2017', 'value': 755200},
-];
-
-  line: any;
-  element;
-  svg: any;
-
-
+  private line: any;
+  private element;
+  private svg: any;
   private width: number;
   private height: number;
-  private margin = { top: 20, bottom: 30, left: 30, right: 20};
-  private circleWidth = 30;
-  private innerRadius;
-  private outerRadius;
+  private margin = { top: 20, bottom: 30, left: 20, right: 20 };
+  private padding = { top: 20, bottom: 30, left: 20, right: 130 };
+  private legendD = { width: 70, height: 35 };
   private xScale: any;
   private yScale: any;
-  private colors: any;
+  private color = d3.scaleOrdinal().range(['#1E90FF', '#00CED1', '#4682B4', '#87CEEB', '#4169E1', '#7B68EE']);
+  private xAxisG: any;
   private xAxis: any;
-  private yAxis: any;
+  private yAxisG: any;
+  private lineG: any;
+  // private timer: any;
+  private legend: any;
+  private onInstantVisit$: Subscription;
 
-  constructor() { }
+  private dataset: any;
+  private instantData: number[] = [0, 0, 0, 0];
+
+
+  constructor(private mapService: MapService) { }
 
   ngOnInit() {
-    this.element = this.chartContainer.nativeElement;
+    this.getInstantVisit();
     this.createBase();
     this.createChart();
+    setTimeout(() => {
+      this.onInstantVisit$ = this.mapService.onInstantVisit.subscribe(d => this.onInstantVisit(d));
+    }, 1000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.onInstantVisit$) {
+      this.onInstantVisit$.unsubscribe();
+    }
+  }
+
+  onInstantVisit(data: object[]) {
+    this.dataset = this.parseData(data);
+    this.updateChart();
+  }
+
+  getInstantVisit() {
+    const data = this.mapService.getInstantZoneVisit();
+    this.dataset = this.parseData(data);
+  }
+
+  parseData(data: object[]) {
+    if (data.length === 0) {
+      return [[], [], [], []];
+    }
+
+    this.instantData = data[data.length - 1]['visit'];
+    console.log(this.instantData);
+    return d3.range(data[0]['visit'].length)
+      .map(i =>
+        data.map(
+          (d: { time: any, visit: any }) => ({ 'time': d.time, 'visit': d.visit[i] })
+        )
+      );
   }
 
   createBase() {
-    this.width = this.element.offsetWidth;
-    this.height = 160;
-    if (this.element.parentNode.parentNode.getBoundingClientRect().height === 300) {
-      this.height = 300;
-    }
-     /* ----------create svg------------*/
+    this.element = this.chartContainer.nativeElement;
+    this.width = this.element.offsetWidth - this.margin.left - this.margin.right;
+    this.height = 300 - this.margin.top - this.margin.bottom;
+    /* ----------create svg------------*/
     this.svg = d3.select(this.element).append('svg');
     this.svg.attr('class', 'chartBase')
-              .attr('width', this.element.offsetWidth)
-              .attr('height', this.height);
+      .attr('width', this.width)
+      .attr('height', this.height);
   }
 
   createChart() {
-
-    const xScale = d3.scaleTime().range([0, this.width - this.margin.left - this.margin.right]);
-    const yScale = d3.scaleLinear().range([this.height - this.margin.top - this.margin.bottom, 0]);
-
-
-
     /* ----------create line generator------------*/
     this.line = d3.line();
     this.line
-      .x(d => xScale(d.year))
-      .y(d => yScale(d.value));
+      .x(d => this.xScale(Date.parse(d.time)))
+      .y(d => this.yScale(d.visit));
 
-  /* ----------set data parser------------*/
+    // /* ----------set data parser------------*/
 
-    this.dataset.forEach(d => this.dataparse(d));
-    this.dataset2.forEach(d => this.dataparse(d));
+    //   this.dataset.forEach(d => this.dataparse(d));
 
     /* ----------set scale domain------------*/
-    const min = (d3.min([d3.min(this.dataset2, d => d.value), d3.min(this.dataset, d => d.value)]));
-    const max = (d3.max([d3.max(this.dataset2, d => d.value), d3.max(this.dataset, d => d.value)]));
-    xScale.domain(d3.extent(this.dataset, d =>  d.year ));
-    yScale.domain([min / 1.002, max * 1.002]);
+    const min = 0;  // (d3.min([d3.min(this.dataset, d => d.value), d3.min(this.dataset, d => d.time)]));   // 0
+    const max = 10; // (d3.max([d3.max(this.dataset, d => d.value), d3.max(this.dataset, d => d.value)]));   // 10
+
+    this.xScale = d3.scaleTime()
+      .range([0, this.width - this.padding.right])
+      .domain(d3.extent(this.dataset[0], (d, i) => Date.parse(d.time)));
+
+    this.yScale = d3.scaleLinear()
+      .range([this.height - this.margin.top - this.margin.bottom, 0])
+      .domain([min / 1, max * 1.1]);
+
 
     /* ----------append Axis------------*/
-   this.svg.append('g').attr('class', 'line-g');
-   const g = this.svg.select('g');
-    g.attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
-       g.append('g')
-      .attr('class', 'axis axis--x')
-      .attr('transform', 'translate(0,' + (this.height  - this.margin.top - this.margin.bottom) + ')')
-      // TODO add scalbel axis condition here .ticks()
-      .call(d3.axisBottom(xScale));
+    this.svg.append('g').attr('class', 'g');
 
-      g.append('g')
-      .attr('class', 'axis axis--y')
-      .call(d3.axisLeft(yScale).ticks(6).tickFormat(function(d) { return (d / 1000) + 'k'; }))
+    const g = this.svg.select('g');
+    g.attr('transform', 'translate(' + (2 * this.margin.left) + ','
+      + (this.margin.top) + ')');
+
+    this.xAxis = d3.axisBottom(this.xScale)
+      .ticks(d3.timeSecond.every(1))
+      .tickSizeInner(15)
+      .tickFormat(d3.timeFormat('%M:%S'));
+
+    this.xAxisG = g.append('g')
+      .attr('class', 'axis axis--x')
+      .attr('transform', 'translate(0,' + (this.height - this.margin.top - this.margin.bottom) + ')');
+    // TODO add scalbel axis condition here .ticks()
+    this.xAxisG
+      .call(this.xAxis);
+
+    g.append('rect')
+      .attr('fill', 'white')
+      .attr('width', this.margin.left + this.margin.right)
+      .attr('height', this.margin.bottom)
+      .attr('x', -this.margin.left - this.margin.right)
+      .attr('y', this.height - this.margin.bottom - this.margin.top);
+
+
+    this.yAxisG = g.append('g')
+      .attr('class', 'axis axis--y');
+
+    this.yAxisG.call(d3.axisLeft(this.yScale).ticks(6)
+      .tickFormat(function (d) { return d; }))
       .append('text')
       .attr('class', 'axis-title')
       .attr('transform', 'rotate(-90)')
+      // .attr('transform', 'translate(' + (this.width - this.margin.left ) + ', 0)')
       .attr('y', 6)
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
       .attr('fill', '#5D6971');
 
-    const lineG = this.svg.select('.line-g');
+    // console.log(this.dataS);
 
-      lineG.append('path')
-      .datum(this.dataset)
-      .attr('class', 'line')
+
+    /* ----------append line------------*/
+    this.lineG = this.svg.select('.g').append('g').attr('class', 'line-g')
+      .selectAll().data(this.dataset).enter().append('path');
+
+    this.lineG
+      .attr('class', d => 'line')
+      .attr('id', (d, i) => 'line' + i)
       .attr('d', this.line)
       .style('fill', 'none')
-      .style('stroke', 'SKYBLUE')
-      .style('stroke-width', 2)
-        .transition()
-          .delay(500)
-          .duration(1000)
-          .attr('d', this.line(this.dataset2))
-          .style('stroke', 'cyan')
-          .ease(d3.easeQuadOut);
+      .style('stroke', (d, i) => this.color(i))
+      .style('stroke-width', 2);
+    /* ----------append legend------------*/
+    this.legend = this.svg.select('.g').append('g').attr('class', 'legend-g')
+      .selectAll().data(this.instantData).enter().append('g');
 
 
+    this.legend.attr('class', 'legend')
+      .attr('id', (d, i) => 'legend' + i)
+      .attr('transform', d => 'translate(' + (this.width - this.padding.right + this.legendD.width / 3) + ','
+        + (this.yScale(d) - this.legendD.height / 2) + ')');
+      // .attr('x', this.width - this.padding.right +  this.legendD.width)
+      // .attr('y', d => this.yScale(d) - this.legendD.height / 2)
+      // .append('rect')
+      // .attr('width', this.legendD.width)
+      // .attr('height', this.legendD.height)
+      // .attr('fill', (d, i) => 'black')
+      // .attr('fill-opacity', d => 0.3);
 
-      lineG.append('path')
-          .datum(this.dataset2)
-          .attr('class', 'line')
-          .attr('d', this.line)
-          .style('fill', 'none')
-          .style('stroke', 'LAWNGREEN')
-          .style('stroke-width', 2)
-            .transition()
-              .delay(1000)
-              .duration(500)
-              .attr('d', this.line(this.dataset))
-              .style('stroke', 'LIGHTSEAGREEN')
-              .ease(d3.easeQuadOut);
+    this.legend
+      .append('text')
+      .attr('transform', d => 'translate(' + (10) + ','
+        + (this.legendD.height / 2 + 4) + ')')
+      //  .attr('text-anchor', 'middle')
+      .style('font-size', 18)
+      .style('font-weigh', 700)
+      .style('fill', (d, i) => this.color(i))
+      .text((d, i) => `Zone ${i + 1}`);
+    //  .attr('textr', 123)
+
   }
 
-  dataparse(d) {
-    const parseTime = d3.timeParse('%Y');
-    const bisectDate = d3.bisector(a => a.year).left;
-    d.year = parseTime(d.year);
-    d.value = +d.value;
+  updateChart() {
+    // console.log(this.dataset)
+    /* ----------update domain------------*/
+    // const min = (d3.min([d3.min(this.dataset, d => d.value), d3.min(this.dataset, d => d.value)]));
+    // const max = (d3.max([d3.max(this.dataset, d => d.value), d3.max(this.dataset, d => d.value)]));
+
+    this.xScale = d3.scaleTime()
+      .range([0, this.width - this.padding.right])
+      .domain(d3.extent(this.dataset[0], (d, i) => Date.parse(d.time)));
+
+    console.log(d3.extent(this.dataset[0], (d, i) => Date.parse(d.time)));
+    // this.yScale.domain([min / 1.002, max * 1.002]);
+    this.line
+      .x(d => this.xScale(Date.parse(d.time)))
+      .y(d => this.yScale(d.visit));
+
+
+    /* ----------update axis------------*/
+
+    this.xAxis = d3.axisBottom(this.xScale)
+      .ticks(d3.timeSecond.every(1))
+      .tickSizeInner(15)
+      .tickFormat(d3.timeFormat('%M:%S'));
+
+
+    this.xAxisG
+      .transition()
+      .duration(1100)
+      .ease(d3.easeLinear)
+      .call(this.xAxis);
+
+
+    // this.lineG = this.svg.select('.g').append('g').attr('class', 'line-g')
+    // .selectAll().data(this.dataset).enter().append('path');
+
+    // this.lineG
+    //   .attr('class', (d, i) => 'line')
+    //   .attr('d', this.line)
+    //   .style('fill', 'none')
+    //   .style('stroke', 'SKYBLUE')
+    //   .style('stroke-width', 2);
+
+
+
+    /* ----------update line------------*/
+    this.lineG.data(this.dataset).selectAll('line').data(d => d);
+
+    this.lineG
+      .transition()
+      .duration(1100)
+      .ease(d3.easeLinear)
+      .attr('d', this.line)
+      // .style('stroke', 'LIGHTSEAGREEN')
+      .style('stroke-width', 2);
+
+    /* ----------update legend------------*/
+    this.legend.data(this.instantData).selectAll('g').data(d => d);
+    this.legend
+      .transition()
+      .duration(1100)
+      .ease(d3.easeLinear)
+      .attr('transform', d => 'translate(' + (this.width - this.padding.right + this.legendD.width / 3) + ','
+        + (this.yScale(d) - this.legendD.height / 2) + ')');
+    this.legend.select('text')
+      .text((d, i) => `Zone ${i + 1}`);
   }
+
 }
+

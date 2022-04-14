@@ -8,6 +8,7 @@ export class Tracker {
     public activated: boolean;
     public participant: Participant;
     public color: string;
+    public productId: number;
 
     public alias: string;
     public note: string;
@@ -16,13 +17,14 @@ export class Tracker {
     public locs: any;
     public currentLoc: number;
 
-    constructor(id: number, tag_id: string, xCrd: number, yCrd: number, participant?: Participant) {
+    constructor(id: number, tag_id: string, xCrd: number, yCrd: number, productId?: number, participant?: Participant) {
         this.id = id;
         this.tagId = tag_id;
         this.xCrd = xCrd;
         this.yCrd = yCrd;
         this.selected = false;
         this.activated = true;
+        this.productId = productId;
         if (participant) {
             this.participant = participant;
         }
@@ -40,6 +42,10 @@ export class Tracker {
 
     setTime(time: number) {
         this.time = time;
+    }
+
+    setProductId(productId: number) {
+        this.productId = productId;
     }
 
     _getCrd() {

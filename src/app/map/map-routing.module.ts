@@ -5,6 +5,7 @@ import { MapComponent } from './map.component';
 import { MapDemoComponent } from './map-demo/map-demo.component';
 import { TrackingMapComponent } from './tracking-map/tracking-map.component';
 import { TrackerDetailComponent } from './tracker-detail/tracker-detail.component';
+import { MapLineComponent } from './map-line/map-line.component';
 
 const mapRoutes: Routes = [
     {path: '',
@@ -12,6 +13,7 @@ const mapRoutes: Routes = [
         children: [
             {path: '', redirectTo: 'barchart', pathMatch: 'full'},
             {path: 'barchart', component: MapDemoComponent},
+            {path: 'lineChart', component: MapLineComponent},
             {path: 'tracker',
              component: TrackerDetailComponent,
             //  children: [

@@ -65,7 +65,7 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
       // .ease(d3.easeLinear)
       // .delay((d, i) =>  200 + i * 50)
       .duration(800)
-      .attrTween('d', function(d, i) { return self.arcTween(d, _current[i], self); })
+      .attrTween('d', function(d, i) { return self.arcTween(d, _current[i], self); });
 
       this.textG
         .transition()
