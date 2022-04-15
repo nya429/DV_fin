@@ -52,10 +52,10 @@ export class MapLineComponent implements OnInit, OnDestroy {
     }
   }
 
-  onInstantVisit(data: object[]) {
+  onInstantVisit({data, dur}) {
     this.dataset = this.parseData(data);
-    console.log(this.dataset[0].map(d => d.time))
-    this.updateChart();
+    console.log(this.dataset[0].map(d => d.time));
+    this.updateChart(dur);
   }
 
   getInstantVisit() {
@@ -69,7 +69,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
     }
 
     this.instantData = data[data.length - 1]['visit'];
- 
+
     return d3.range(data[0]['visit'].length)
       .map(i =>
         data
@@ -200,7 +200,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
   }
 
-  updateChart() {
+  updateChart(dur: boolean) {
     // console.log(this.dataset)
     /* ----------update domain------------*/
     // const min = (d3.min([d3.min(this.dataset, d => d.value), d3.min(this.dataset, d => d.value)]));
@@ -227,7 +227,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
     this.xAxisG
       .transition()
-      .duration(890)
+      .duration(dur ? 899 : 0)
       .ease(d3.easeLinear)
       .call(this.xAxis);
       // .on('end', function (){setTimeout(animate);});;
@@ -250,7 +250,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
     this.lineG
       .transition()
-      .duration(1000)
+      .duration(dur ? 1000 : 0)
       .ease(d3.easeLinear)
       .attr('d', this.line)
       // .style('stroke', 'LIGHTSEAGREEN')
@@ -260,7 +260,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
     this.legend.data(this.instantData).selectAll('g').data(d => d);
     this.legend
       .transition()
-      .duration(1000)
+      .duration(dur ? 1000 : 0)
       .ease(d3.easeLinear)
       .attr('transform', d => 'translate(' + (this.width - this.padding.right + this.legendD.width / 3) + ','
         + (this.yScale(d) - this.legendD.height / 2) + ')');

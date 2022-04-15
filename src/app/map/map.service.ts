@@ -81,7 +81,10 @@ export class MapService {
     curP: number;
 
     private testZoneData = [0, 0, 0, 0];
-    private insantVisitData: object[] = [
+  
+    private insantVisitDataHis: object[];
+
+    private insantVisitDataInit: object[] = [
         // {time: '2017-12-31T23:59:45Z', visit: [0, 0, 0, 0]},
         // {time: '2017-12-31T23:59:46Z', visit: [0, 0, 0, 0]},
         // {time: '2017-12-31T23:59:47Z', visit: [0, 0, 0, 0]},
@@ -99,10 +102,10 @@ export class MapService {
         {time: '2017-12-31T23:59:59Z', visit: [0, 0, 0, 0]},
 
     ];
-
+    private insantVisitData: object[] = [...this.insantVisitDataInit];
     onAccVisit = new Subject<number[]>();
     onTrackerAccVisit = new Subject<number[]>();
-    onInstantVisit = new Subject<object[]>();
+    onInstantVisit = new Subject<{data: object[], dur: boolean}>();
 
     // TODO those are participants
     private trackers: Tracker[];
@@ -187,6 +190,9 @@ export class MapService {
 
             const customer_ids =  this.trackers.map(tracker => tracker.tagId);
             this.getLocationRealTime();
+
+            this.resetChartData();
+
             this.sse$ = this.realTimeSubject.subscribe(data => {
                 this.sse$.unsubscribe();
                 const locations = JSON.parse(data);
@@ -549,6 +555,9 @@ export class MapService {
                         trac.setLocs(data, 0);
                         // all ready
                         if (customer_ids_index === customer_ids.length) {
+
+                            this.loadInstantVisit();
+
                             this.minP = 1;
                             this.maxP = data.length;
 
@@ -582,7 +591,7 @@ export class MapService {
             this.trackers.map((tracker, index) => {
                 this.testMoveHis(tracker, index);
             });
-            this.updateInstantVisit();
+            this.updateInstantVisitByTime();
             // console.log(this.sysTime);
             this.rnadomData();    // remove it after api finished
             this.emitChartData();
@@ -590,10 +599,10 @@ export class MapService {
         }, 910);
     }
 
-    emitChartData() {
+    emitChartData(dur = true) {
         this.accVisit();
         this.accVisitByTracker();
-        this.instantVisit();
+        this.instantVisit(dur);
     }
 
     accVisit() {
@@ -612,11 +621,37 @@ export class MapService {
         return this.testZoneData;
     }
 
-
-    instantVisit() {
-        this.onInstantVisit.next([...this.insantVisitData]);
+    resetChartData() {
+        this.insantVisitData = [...this.insantVisitDataInit];
     }
 
+    instantVisit(dur) {
+        this.onInstantVisit.next({data: [...this.insantVisitData], dur});
+    }
+
+    loadInstantVisit() {
+        const instantVisits = this.trackers[0].locs
+            .map(t => ({time: t.time, visit: [0, 0, 0, 0]}));
+
+        this.trackers.forEach(trac => {
+
+            trac.locs.forEach((l, i: number) => {
+                const productId = l['product_id'];
+                const time = l['time'];
+                if (productId > 0)  {
+                    instantVisits[i].visit[productId - 1] += 1;
+                }
+            });
+        });
+
+       this.insantVisitDataHis = [...this.insantVisitDataInit, ...instantVisits];
+    }
+
+    updateInstantVisitByTime() {
+        const len = this.insantVisitDataInit.length;
+        const idx = this.insantVisitDataHis.findIndex(instant => instant['time'] === this.sysTime);
+        this.insantVisitData = this.insantVisitDataHis.slice(idx + 1 - len, idx + 1);
+    }
 
     updateInstantVisit() {
         this.insantVisitData.shift();
@@ -630,8 +665,6 @@ export class MapService {
 
 
         this.insantVisitData.push(instantVisit);
-
-        console.log(this.insantVisitData.map(d => d['time']))
     }
 
     getInstantZoneVisit() {
@@ -692,16 +725,23 @@ export class MapService {
     changeSliderP(p): void {
         const index = this.getSliderIndex(p);
 
-        this.trackers.map((tracker) => {
+        this.trackers.map((tracker,  idx: number) => {
             tracker.currentLoc = index;
             const nextLoc = tracker.locs[index];
             tracker.setCrd((nextLoc.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
             (nextLoc.loc_y + 0.5)  / this.trackerBoundary.y * this.base.height);
             // tracker.setTime(nextLoc.time * 1000);
             tracker.setTime(nextLoc.time );
+
+            if (idx === 0) {
+                this.setSysTime(nextLoc.time);
+            }
         });
         // console.log(this.sysTime);
+
+        this.updateInstantVisitByTime();
         this.trackerLocChanges.next({trackers: [...this.trackers], dur: 0});
+        this.emitChartData(false);
     }
 
     getSlideP(): number {
