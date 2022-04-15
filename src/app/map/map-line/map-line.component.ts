@@ -54,7 +54,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
   onInstantVisit({data, dur}) {
     this.dataset = this.parseData(data);
-    console.log(this.dataset[0].map(d => d.time));
+    // console.log(this.dataset[0].map(d => d.time));
     this.updateChart(dur);
   }
 
