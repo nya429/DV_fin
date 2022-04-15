@@ -1,4 +1,18 @@
 <div class="chart-container">
-    <div class="chart-display"></div>  
+    <div class="chart-display">
+
+
+        <div *ngIf="isBarSelected()" class="container">
+            <div class="row">
+                <h4>Zone_{{getSelectedZoneIndex() + 1}} Accumulative Visit by Tracker</h4>
+            </div>
+        </div>
+
+        <div *ngIf="!isBarSelected()" class="container">
+            <div class="row">
+                <h4>Select a Bar to view accumulative visit</h4>
+            </div>
+        </div>
+    </div>  
     <div class="d3-chart" #chart></div>  
 </div>

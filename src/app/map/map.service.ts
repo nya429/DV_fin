@@ -81,7 +81,7 @@ export class MapService {
     curP: number;
 
     private testZoneData = [0, 0, 0, 0];
-  
+
     private insantVisitDataHis: object[];
 
     private insantVisitDataInit: object[] = [
@@ -116,6 +116,8 @@ export class MapService {
         [-1, 1], [0, 1], [1, 1]
     ];
     private SSECheck: any;
+
+    private selectedZoneIndex: number;
     /**
      * base
      * tracker boundary
@@ -766,5 +768,17 @@ export class MapService {
 
     onWindowResize() {
         this.windowResized.next();
+    }
+
+    setSelectedZoneIndex(i: number): void {
+        this.selectedZoneIndex = i;
+    }
+
+    getSelectedZoneIndex(): number {
+        return this.selectedZoneIndex;
+    }
+
+    diselecctZoneIndex() {
+        this.selectedZoneIndex = null;
     }
 }

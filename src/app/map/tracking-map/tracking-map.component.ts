@@ -1037,11 +1037,11 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     .attr('r', 7);
   }
 
-  scaleDragged(d: any) {
+  scaleDragged(data: any) {
     this.scaleDragger
-    .attr('cy', (d) => this.calDraggerHeight(d));
+    .attr('cy', (d: any) => this.calDraggerHeight(d));
     this.draggerActiveLine
-    .attr('y1', (d) => this.calDraggerHeight(d));
+    .attr('y1', (d: any) => this.calDraggerHeight(d));
 
     this.initMapScale();
     const element = this.chartContainer.nativeElement;

@@ -35,6 +35,8 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   // private timer: any;
   private xz: any;
 
+  private selectedIndex: number;
+
   // private onStartSubscription: Subscription;
   // private onStopSubscription: Subscription;
   // private onTestSubscription: Subscription;
@@ -46,7 +48,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   constructor(private mapService: MapService) { }
 
   ngOnInit() {
-    this.dataset =  this.mapService.getAccVisit();
+    this.dataset = this.mapService.getAccVisit();
     this.initBase();
     this.initChart();
     setTimeout(() => {
@@ -304,7 +306,8 @@ export class MapDemoComponent implements OnInit, OnDestroy {
       })
       .attr('height', function (d) {
         return that.baseElement.offsetHeight - that.padding.top - that.padding.bottom - that.yScale(d);
-      });
+      })
+      .style('cursor', 'pointer');
 
     this.texts = this.svg.selectAll('.BarText')
       .data(this.dataset)
@@ -341,5 +344,32 @@ export class MapDemoComponent implements OnInit, OnDestroy {
         return that.yScale(d) + that.padding.top;
       });
 
+
+    this.rectBar.on('click', function (d, i) {
+      d3.event.stopPropagation();
+      that.rectBar.attr('opacity', (da, idx) => idx !== i ? 0.6 : 1);
+      that.onBarClick(i);
+    });
+
+    this.svg.on('click', () => {
+      this.onDiselectBar();
+      this.rectBar.attr('opacity', (da, idx) => 1);
+    });
+  }
+
+  onBarClick(i: number): void {
+    this.mapService.setSelectedZoneIndex(i);
+  }
+
+  onDiselectBar() {
+    this.mapService.diselecctZoneIndex();
+  }
+
+  getSelectedZoneIndex() {
+    return this.mapService.getSelectedZoneIndex();
+  }
+
+  isBarSelected() {
+    return (typeof this. getSelectedZoneIndex()) === 'number';
   }
 }
