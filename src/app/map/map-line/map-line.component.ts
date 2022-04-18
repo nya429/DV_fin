@@ -227,7 +227,7 @@ export class MapLineComponent implements OnInit, OnDestroy {
 
     this.xAxisG
       .transition()
-      .duration(dur ? 899 : 0)
+      .duration(dur ? 1000 : 0)
       .ease(d3.easeLinear)
       .call(this.xAxis);
       // .on('end', function (){setTimeout(animate);});;

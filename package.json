@@ -8,7 +8,9 @@
     "build": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "clean": "aws s3 rm s3://dvhw --recursive",
+    "deploy": "aws s3 cp dist/ s3://dvhw --recursive"
   },
   "private": true,
   "dependencies": {
