@@ -13,7 +13,7 @@
     <br>
     <div class="row">
 
-        <form #f="ngForm" >
+        <!-- <form #f="ngForm" > -->
         <!-- <div class="col-sm-3">
           <div class="search-grp">
           <input class="inline search-grp-input" placeholder="search"  type="text">
@@ -24,7 +24,7 @@
          </div>
         </div> -->
 
-        <div class="col-md-3 col-sm-9 form-group"
+        <!-- <div class="col-md-3 col-sm-9 form-group"
             appClickOutside 
             (clickOutside)="onFilterFold()">
             
@@ -78,14 +78,14 @@
                               <option value="2">Only Visitors</option>
                               <option value="1">Only VIPs</option> 
                           </select>
-                      </span>
+                      </span> -->
                     <!-- <span class="select-wrapper">
                       <select required 
                       class="form-control filter-selection">
                           <option value="0">More filters</option> 
                       </select>
                     </span> -->
-                    <span 
+                    <!-- <span 
                     (click)="onFilterFold()" 
                     style="cursor:pointer;"
                     title='close' 
@@ -95,33 +95,39 @@
             </div>
 
         </div>  
-      </form> 
-      <div class="col-md-6 col-sm-9">
+      </form>  -->
+      <div class="col-md-3 col-sm-9" align="center">
+        <div class="playmode"  [ngClass]="{'realtime': !playBackMode, 
+        'playback': playBackMode}" >
+            <div class="playmode-icon"  style="color: orange">
+                <!-- <i class="fa fa-history" style="font-size:28px"></i> -->
+                Playback
+            </div>
+            <i class="penal-toggle fa fa-toggle-on cursor-pointer" (click)='onToggle()'
+            [ngClass]="{'cursor-notallow': !stopped }" 
+            style="font-size:36px"></i>
+            <div class="playmode-icon" style="color:deepskyblue">
+                <!-- <i class="fa fa-mail-forward" style="font-size:28px"></i> -->
+                Real-time
+            </div>
+            
+        </div>
+        
+      </div>
+      <div class="col-md-6 col-sm-9" align="center">
         <div class="slidecontainer">
           <!-- <p>initiated{{initiated}} started{{started}} strop{{stopped}}</p> -->
           <input id="slider" type="range" min="1" max="100" [value]="0" #ranger [disabled]="!playBackMode" (input)="onSlide(ranger.value)">
         </div>
         
       </div>
-      <div class="col-md-3 col-sm-3" align="right">
+      <div class="col-md-3 col-sm-9" align="center">
           
           <!-- <button class="btn btn-danger"  (click)='getHistory()'>test</button>
           <button class="btn btn-success" [disabled]="stopping" (click)='onStart()'>{{ started ? 'Pause' : 'Start'}}</button>
           <button class="btn btn-danger" [disabled]="!initiated" (click)='onStop()'>Stop</button> -->
           
-          <div class="playmode"  [ngClass]="{'realtime': !playBackMode, 
-          'playback': playBackMode}" >
-              <div class="playmode-icon">
-                  <i class="fa fa-history" style="font-size:28px"></i>
-              </div>
-              <i class="penal-toggle fa fa-toggle-on cursor-pointer" (click)='onToggle()'
-              [ngClass]="{'cursor-notallow': !stopped }" 
-              style="font-size:36px"></i>
-              <div class="playmode-icon">
-                  <i class="fa fa-mail-forward" style="font-size:28px"></i>
-              </div>
-              
-          </div>
+
           
           <span (click)='onStart()' 
           [ngClass]="{

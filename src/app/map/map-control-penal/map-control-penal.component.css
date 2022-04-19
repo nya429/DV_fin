@@ -283,7 +283,10 @@ span + .company-filter-text {
 
 .playmode-icon {
   display: inline-block;
-  margin-top: -10px;
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: bolder;
+  vertical-align: top;
 }
 
 .playmode-icon .fa {

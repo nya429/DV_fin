@@ -11,7 +11,7 @@ const mapRoutes: Routes = [
     {path: '',
         component: MapComponent,
         children: [
-            {path: '', redirectTo: 'barchart', pathMatch: 'full'},
+            {path: '', redirectTo: 'lineChart', pathMatch: 'full'},
             {path: 'barchart', component: MapDemoComponent},
             {path: 'lineChart', component: MapLineComponent},
             {path: 'tracker',

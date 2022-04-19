@@ -106,9 +106,9 @@ export class MapService {
 
     ];
     private insantVisitData: object[] = [...this.insantVisitDataInit];
-    onAccVisit = new Subject<number[]>();
+    onAccVisit = new Subject<{data: number[], dur: boolean}>();
     onAccVisitByZone = new Subject<object[]>();
-    onTrackerAccVisit = new Subject<number[]>();
+    onTrackerAccVisit = new Subject<{data: number[], dur: boolean}>();
 
     onInstantVisit = new Subject<{data: object[], dur: boolean}>();
 
@@ -345,7 +345,7 @@ export class MapService {
             });
 
             this.updateInstantVisit();
-            this.rnadomData(); // REMOVE after API
+            // this.rnadomData(); // REMOVE after API
             this.calcAccVisit();
             this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
@@ -371,7 +371,7 @@ export class MapService {
              this.trackers.forEach(trac =>
                trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width));
-               console.log(this.trackers[0]);
+            //    console.log(this.trackers[0]);
                this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         });
     }
@@ -401,6 +401,7 @@ export class MapService {
     }
 
     onTrackerHasSelected(id: number | null) {
+        console.log(id)
         this.selectedTrackerId = id !== null ? id - 1 : null;
         this.hasSelectedTracker.next(id);
     }
@@ -410,8 +411,8 @@ export class MapService {
             tracker => {
                 if (tracker.id === id) {
                     tracker.activated = !tracker.isActivated();
-                    console.log('this point activated?' , tracker.isActivated());
-                    console.log('this point selected?' , tracker.selected);
+                    // console.log('this point activated?' , tracker.isActivated());
+                    // console.log('this point selected?' , tracker.selected);
                 }
                 return tracker;
             }
@@ -631,7 +632,7 @@ export class MapService {
             });
             this.updateInstantVisitByTime();
             // console.log(this.sysTime);
-            this.rnadomData();    // remove it after api finished
+            // this.rnadomData();    // remove it after api finished
             this.calcAccVisit();
             this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
@@ -655,7 +656,7 @@ export class MapService {
     }
 
     accVisit(dur) {
-        this.onAccVisit.next(this.accVisitData);
+        this.onAccVisit.next({data: [...this.accVisitData], dur});
 
         if (this.selectedZoneIndex === null) {
             return;
@@ -672,12 +673,16 @@ export class MapService {
     accVisitByTracker(dur) {
         if (this.selectedTrackerId !== null) {
             const trackerAccVisit = this.trackers[this.selectedTrackerId].accVisit;
-            this.onTrackerAccVisit.next([...trackerAccVisit]);
+            this.onTrackerAccVisit.next({data: [...trackerAccVisit], dur});
         }
     }
 
-    getAccVisitByTracker(dur: number): number[] {
-        return this.testZoneData;
+    getAccVisitByTracker(id: number): number[] {
+        if (this.selectedTrackerId !== null) {
+            return this.trackers[this.selectedTrackerId].accVisit;
+        } else {
+            return this.testZoneData;
+        }
     }
 
     resetChartData() {
@@ -791,6 +796,8 @@ export class MapService {
             (nextLoc.loc_y + 0.5)  / this.trackerBoundary.y * this.base.height);
             // tracker.setTime(nextLoc.time * 1000);
             tracker.setTime(nextLoc.time );
+            tracker.setProductId(nextLoc.productId);
+            tracker.setAccVisit(nextLoc.preSum);
 
             if (idx === 0) {
                 this.setSysTime(nextLoc.time);
@@ -799,6 +806,7 @@ export class MapService {
         // console.log(this.sysTime);
 
         this.updateInstantVisitByTime();
+        this.calcAccVisit();
         this.trackerLocChanges.next({trackers: [...this.trackers], dur: 0});
         this.emitChartData(false);
     }

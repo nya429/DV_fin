@@ -94,9 +94,10 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   //   this.startChart();
   // }
 
-  onAccZone(d: number[]) {
-    this.dataset = [...d];
-    this.updateChart();
+  onAccZone(d: {data: number[], dur: boolean}) {
+    const {data, dur} = d;
+    this.dataset = [...data];
+    this.updateChart(dur);
   }
 
   // startChart() {
@@ -145,7 +146,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
 
   }
 
-  updateChart(): void {
+  updateChart(dur: boolean): void {
     const prev = this.xz;
 
     this.xz = d3.range(this.dataset.length).sort((a, b) => {
@@ -176,11 +177,11 @@ export class MapDemoComponent implements OnInit, OnDestroy {
     this.rectBar.data(this.dataset).selectAll('rect').data(d => d);
     this.texts.data(this.dataset).selectAll('text').data(d => d);
 
-    this.yAxisG.transition().duration(duration1).call(this.yAxis);
+    this.yAxisG.transition() .duration(dur ? duration1 : 0).call(this.yAxis);
 
     this.rectBar
       .transition()
-      .duration(duration1)
+      .duration(dur ? duration1 : 0)
       // .ease(d3.easeQuadOut)
 
       .attr('y', d => this.yScale(d) + this.padding.top)
@@ -195,7 +196,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
 
     this.texts
       .transition()
-      .duration(duration1)
+      .duration(dur ? duration1 : 0)
       .tween('text', function (d) {
         const node = this;
         const _current = node.textContent;
@@ -217,7 +218,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
       .selectAll('.tick')
       .transition()
       // .delay(duration1)
-      .duration(duration1)
+      .duration(dur ? duration1 : 0)
       .attr(
         'transform',
         (d, i) => `translate(${this.xScale(i) + this.xScale.bandwidth() / 2}, ${0})`
@@ -390,8 +391,8 @@ export class MapDemoComponent implements OnInit, OnDestroy {
     if (!(d.length && d.length > 0)) {
       return;
     }
-    this.zoneDataset = d;
-    // this.zoneDataset = d.sort((a, b) => b.accVisit - a.accVisit);
+    // this.zoneDataset = d;
+    this.zoneDataset = d.sort((a, b) => b.accVisit - a.accVisit);
   }
 
   getZoneDataset() {

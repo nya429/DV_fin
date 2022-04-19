@@ -52,11 +52,13 @@
 .td-title {
   width:15%;
   text-align: right;
+  font-size: 16px;
 }
 
 .td-value {
   width:35%;
-  text-align: left;
+  text-align: center;
+  font-size: 16px;
 }
 
 .td-highlight {
@@ -64,6 +66,7 @@
   /* font-weight: bold; */
   color: white;
   transition: .3s;
+
 }
 
 tbody > tr {

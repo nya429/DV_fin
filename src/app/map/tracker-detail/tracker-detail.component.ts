@@ -40,7 +40,8 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     if (this.mapService.selectedTrackerId !== null) {
-      this.setTrackerDetail(this.mapService.selectedTrackerId);
+      console.log(this.mapService.selectedTrackerId)
+      this.setTrackerDetail(this.mapService.selectedTrackerId + 1);
     }
     // TODO get initial selected data
     // this.tracker = this.mapService
@@ -100,6 +101,7 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
   }
 
   setTrackerDetail(index: number) {
+    console.log('setTrackerDetail', index)
     if  (index == null) {
       this.editedTrackerIndex = null;
       this.tracker = null;

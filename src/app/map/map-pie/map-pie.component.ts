@@ -55,7 +55,7 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-  updateChart(_current) {
+  updateChart(_current, dur) {
     this.arcG.data(this.piedata).selectAll('path').data(d => d);
     this.textG.data(this.piedata).selectAll('text').data(d => d);
     // this.texts.data(this.dataset).selectAll('text').data(d => d);
@@ -64,12 +64,12 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
       .transition()
       // .ease(d3.easeLinear)
       // .delay((d, i) =>  200 + i * 50)
-      .duration(800)
+      .duration(dur ? 800 : 0)
       .attrTween('d', function (d, i) { return self.arcTween(d, _current[i], self); });
 
     this.textG
       .transition()
-      .duration(1000)
+      .duration(dur ? 880 : 0)
       .attr('transform', d => 'translate(' + this.arc.centroid(d) + ')')
       .text(d => d.data === 0 ? '' : d.data);
     // .tween('text', function (d) {
@@ -82,11 +82,12 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
     // });
   }
 
-  onTrackerAccVisit(d: number[]) {
-    this.dataset = [...d];
+  onTrackerAccVisit(d: {data: number[], dur: boolean}) {
+    const {data, dur} = d;
+    this.dataset = [...data];
     const _current = this.piedata;
     this.piedata = this.pie(this.dataset);
-    this.updateChart(_current);
+    this.updateChart(_current, dur);
   }
 
   createBase() {

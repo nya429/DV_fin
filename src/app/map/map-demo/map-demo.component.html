@@ -14,20 +14,20 @@
           </thead>
           <tbody>
             <tr
-              (click)="onCellClick(i)"
-              *ngFor="let tracker of getZoneDataset(); let i = index"
+              (click)="onCellClick(tracker.id)"
+              *ngFor="let tracker of getZoneDataset(); "
             >
               <td
-                [ngClass]="{ 'td-highlight': isTrHighlight(i) }"
+                [ngClass]="{ 'td-highlight': isTrHighlight(tracker.id) }"
                 class="td-title"
               >
                 {{ tracker.name }}
               </td>
               <td
-                [ngClass]="{ 'td-highlight': isTrHighlight(i) }"
+                [ngClass]="{ 'td-highlight': isTrHighlight(tracker.id) }"
                 class="td-value"
               >
-                {{ tracker.accVisit }}
+                {{ tracker.accVisit ? tracker.accVisit : "" }}
               </td>
             </tr>
           </tbody>
