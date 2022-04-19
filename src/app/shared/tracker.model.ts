@@ -16,6 +16,7 @@ export class Tracker {
     public time: number;
     public locs: any;
     public currentLoc: number;
+    public accVisit: number[];
 
     constructor(id: number, tag_id: string, xCrd: number, yCrd: number, productId?: number, participant?: Participant) {
         this.id = id;
@@ -83,6 +84,14 @@ export class Tracker {
 
     getColor(coloc: string) {
         return this.color;
+    }
+
+    getAccVisit() {
+        return this.accVisit;
+    }
+
+    setAccVisit(accVisit: number[]) {
+        this.accVisit = accVisit;
     }
 
 }

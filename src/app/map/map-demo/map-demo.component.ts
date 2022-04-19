@@ -12,7 +12,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   @ViewChild('chart') private chartContainer: ElementRef;
   @Input() private data: Array<any>;
   private baseElement: any;
-  private padding = { left: 30, right: 30, top: 20, bottom: 20 };
+  private padding = { left: 30, right: 30, top: 20, bottom: 50 };
   private rectPadding = 20;
   private margin: any = { top: 20, bottom: 20, left: 20, right: 20 };
   private svg: any;
@@ -28,6 +28,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   private yAxisG: any;
   private testData: any;
   public dataset = [0, 0, 0, 0];
+  public zoneDataset: object[];
   public xDomain = ['Zone1', 'Zone2', 'Zone3', 'Zone4'];
   private minMaxY = 6;
   private rectBar: any;
@@ -42,6 +43,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   // private onTestSubscription: Subscription;
   // private onPauseSubscription: Subscription;
   private ononAccZone$: Subscription;
+  private onAccVisitByZone$: Subscription;
 
   // private chartStarted = false;
 
@@ -49,11 +51,15 @@ export class MapDemoComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.dataset = this.mapService.getAccVisit();
+    this.zoneDataset = this.mapService.getAccVisitByZone();
+    this.getSelectedZoneIndex();
     this.initBase();
     this.initChart();
     setTimeout(() => {
       this.ononAccZone$ = this.mapService.onAccVisit.subscribe(d => this.onAccZone(d));
     }, 1000);
+
+    this.onAccVisitByZone$ = this.mapService.onAccVisitByZone.subscribe(d => this.onSetAccVisitByZone(d));
 
     // this.onStartSubscription = this.mapService.started.subscribe(d => this.onStart(d));
     // this.onStopSubscription = this.mapService.onStopped.subscribe(d => this.onStop(d));
@@ -72,6 +78,10 @@ export class MapDemoComponent implements OnInit, OnDestroy {
     // this.onPauseSubscription.unsubscribe();
     if (this.ononAccZone$) {
       this.ononAccZone$.unsubscribe();
+    }
+
+    if (this.onAccVisitByZone$) {
+      this.onAccVisitByZone$.unsubscribe();
     }
     // this.clearTimer();
   }
@@ -271,6 +281,8 @@ export class MapDemoComponent implements OnInit, OnDestroy {
       .attr('transform', 'translate(' + this.padding.left + ',' + (this.baseElement.offsetHeight - this.padding.bottom) + ')')
       .call(this.xAxis);
 
+    this.xAxisG.style('font-size', '20px');
+
     this.yAxisG = this.svg.append('g')
       .attr('class', 'Y-axis')
       .attr('transform', 'translate(' + this.padding.left + ',' + this.padding.top + ')')
@@ -359,6 +371,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
 
   onBarClick(i: number): void {
     this.mapService.setSelectedZoneIndex(i);
+    this.zoneDataset = this.mapService.getAccVisitByZone();
   }
 
   onDiselectBar() {
@@ -372,4 +385,30 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   isBarSelected() {
     return (typeof this. getSelectedZoneIndex()) === 'number';
   }
+
+  onSetAccVisitByZone(d) {
+    if (!(d.length && d.length > 0)) {
+      return;
+    }
+    this.zoneDataset = d;
+    // this.zoneDataset = d.sort((a, b) => b.accVisit - a.accVisit);
+  }
+
+  getZoneDataset() {
+    if (this.zoneDataset) {
+      return [...this.zoneDataset];
+    } else {
+      return [];
+    }
+  }
+
+  isTrHighlight(i) {
+    return this.mapService.selectedTrackerId === i;
+  }
+
+  onCellClick(i) {
+    this.mapService.onTrackerHasSelected(i + 1);
+    this.mapService.onSelectedTracker(i + 1);
+  }
+
 }

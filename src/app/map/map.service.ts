@@ -1,5 +1,5 @@
 import { Participant } from './../shared/participant.model';
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 
 import { Subject } from 'rxjs/Subject';
@@ -17,7 +17,9 @@ export class MapService {
     // tracker boundary
     private trackerBoundary = {x: 22, y: 20};
 
-    constructor(private httpClient: HttpClient,
+    constructor(
+        private _zone: NgZone,
+        private httpClient: HttpClient,
         private settingService: SettingService) {
             this.httpOptions = {
                headers: new HttpHeaders({
@@ -57,7 +59,7 @@ export class MapService {
     windowResized = new Subject<void> ();
 
     // TODO restructure the selected Tracker
-    selectedTrackerId: number;
+    selectedTrackerId: number | null = null;
     selectedTrackerIndex = new Subject<number>();
     hasSelectedTracker = new Subject<number>();
     hideTrackerIndex = new Subject<number>();
@@ -79,8 +81,9 @@ export class MapService {
     minP: number;
     maxP: number;
     curP: number;
-
+    test: any;
     private testZoneData = [0, 0, 0, 0];
+    private accVisitData = [0, 0, 0, 0];
 
     private insantVisitDataHis: object[];
 
@@ -104,7 +107,9 @@ export class MapService {
     ];
     private insantVisitData: object[] = [...this.insantVisitDataInit];
     onAccVisit = new Subject<number[]>();
+    onAccVisitByZone = new Subject<object[]>();
     onTrackerAccVisit = new Subject<number[]>();
+
     onInstantVisit = new Subject<{data: object[], dur: boolean}>();
 
     // TODO those are participants
@@ -117,7 +122,7 @@ export class MapService {
     ];
     private SSECheck: any;
 
-    private selectedZoneIndex: number;
+    private selectedZoneIndex: number | null = null;
     /**
      * base
      * tracker boundary
@@ -203,10 +208,10 @@ export class MapService {
                     trac.setCrd((location.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                         (location.loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
                     trac.setProductId(location.product_id);
+                    trac.setAccVisit(location.preSum);
                 });
 
                 this.onLoaded.next(true);
-                console.log('onStarted 167');
                 this.onStarted.next(this.mapStarted);
             });
             // this.getParticipantLocalsByIds(customer_ids).subscribe(
@@ -294,6 +299,34 @@ export class MapService {
         return null;
     }
 
+    getTrackerCurLoc(index: number) {
+        if ( this.trackers.slice()[index].xCrd && this.trackers.slice()[index].yCrd) {
+            return [Math.floor(this.trackers.slice()[index].xCrd), Math.floor(this.trackers.slice()[index].yCrd)];
+        }
+        return [null, null];
+    }
+
+    getTrackerProductId(index: number) {
+        if ( this.trackers.slice()[index].productId) {
+            return this.trackers.slice()[index].productId;
+        }
+        return null;
+    }
+
+    getTrackerMostVisit(index: number) {
+        if (this.trackers.slice()[index].accVisit) {
+
+            const arr = this.trackers.slice()[index].accVisit;
+            const max = arr.reduce((acc, curr) => curr > acc ? curr : acc);
+            if (max === 0) {
+                return;
+            }
+            const mostVisit = arr.reduce((acc: number[], curr, idx) => curr === max ? [...acc, idx] : acc, []);
+            return mostVisit;
+        }
+        return null;
+    }
+
 
     move() {
         this.sse$ = this.realTimeSubject.subscribe(data => {
@@ -305,14 +338,15 @@ export class MapService {
                 trac.addLastLoc(location);
                 trac.setProductId(location.product_id);
                 trac.setTime(location.time );
+                trac.setAccVisit(location.preSum);
                 if (idx === 0) {
                     this.setSysTime(location.time);
                 }
             });
-            console.log('trackerLocChanges sse2');
 
             this.updateInstantVisit();
             this.rnadomData(); // REMOVE after API
+            this.calcAccVisit();
             this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         });
@@ -366,7 +400,8 @@ export class MapService {
         this.selectedTrackerIndex.next(id);
     }
 
-    onTrackerHasSelected(id: number) {
+    onTrackerHasSelected(id: number | null) {
+        this.selectedTrackerId = id !== null ? id - 1 : null;
         this.hasSelectedTracker.next(id);
     }
 
@@ -480,8 +515,8 @@ export class MapService {
         this.eventSource = new EventSource(url);
 
         return Observable.create(observer => {
-            this.eventSource.onmessage = x => observer.next(x.data);
-            this.eventSource.onerror = x => observer.error(x);
+            this.eventSource.onmessage = x => this._zone.run(() => observer.next(x.data));
+            this.eventSource.onerror = x => this._zone.run(() => observer.next(x));
         }).subscribe(data => {
             this.realTimeSubject.next(data);
         });
@@ -554,6 +589,7 @@ export class MapService {
                         trac.setCrd((data[0].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                              (data[0].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
                         trac.setProductId(data[0].productId);
+                        trac.setAccVisit(data[0].preSum);
                         trac.setLocs(data, 0);
                         // all ready
                         if (customer_ids_index === customer_ids.length) {
@@ -596,30 +632,51 @@ export class MapService {
             this.updateInstantVisitByTime();
             // console.log(this.sysTime);
             this.rnadomData();    // remove it after api finished
+            this.calcAccVisit();
             this.emitChartData();
             this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         }, 910);
     }
 
     emitChartData(dur = true) {
-        this.accVisit();
-        this.accVisitByTracker();
+        this.accVisit(dur);
+        this.accVisitByTracker(dur);
         this.instantVisit(dur);
     }
 
-    accVisit() {
-        this.onAccVisit.next(this.testZoneData);
+    calcAccVisit() {
+        const accVisit = [0, 0, 0, 0];
+        this.trackers.forEach(t => {
+            t.accVisit.forEach((a, i) => accVisit[i] += a);
+        });
+        this.accVisitData = accVisit;
+        // console.log(this.accVisitData);
+        // this.calcAccVisitByZone();
+    }
+
+    accVisit(dur) {
+        this.onAccVisit.next(this.accVisitData);
+
+        if (this.selectedZoneIndex === null) {
+            return;
+        }
+
+        const accVisitByZone = this.getAccVisitByZone();
+        this.onAccVisitByZone.next([...accVisitByZone]);
     }
 
     getAccVisit() {
-        return this.testZoneData;
+        return this.accVisitData;
     }
 
-    accVisitByTracker() {
-        this.onTrackerAccVisit.next(this.testZoneData);
+    accVisitByTracker(dur) {
+        if (this.selectedTrackerId !== null) {
+            const trackerAccVisit = this.trackers[this.selectedTrackerId].accVisit;
+            this.onTrackerAccVisit.next([...trackerAccVisit]);
+        }
     }
 
-    getAccVisitByTracker(tracker_idx: number): number[] {
+    getAccVisitByTracker(dur: number): number[] {
         return this.testZoneData;
     }
 
@@ -707,7 +764,7 @@ export class MapService {
         // console.log(nextLoc.product_id)
         tracker.setProductId(nextLoc.product_id);
         tracker.setTime(nextLoc.time );
-
+        tracker.setAccVisit(nextLoc.preSum);
         if (index === 0) {
             this.setSysTime(nextLoc.time);
             this.playSliderP(nextLocIndex);
@@ -780,5 +837,15 @@ export class MapService {
 
     diselecctZoneIndex() {
         this.selectedZoneIndex = null;
+    }
+
+    getAccVisitByZone() {
+        if (this.selectedZoneIndex === null) {
+            return null;
+        }
+
+        return this.trackers.map((t, i) =>
+            ({'id': i, 'trackerId': t.tagId, 'name': t.alias, 'accVisit': t.accVisit[this.selectedZoneIndex]})
+        );
     }
 }

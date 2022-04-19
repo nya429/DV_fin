@@ -25,13 +25,13 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private width: number;
   private height: number;
-  // private margin: any = { top: 20, bottom: 20, left: 20, right: 20};
+  private margin: any = { top: 20, bottom: 20, left: 20, right: 50};
   private circleWidth = 40;
   private innerRadius;
   private outerRadius;
   private color = d3.scaleOrdinal().range(['#1E90FF', '#00CED1', '#4682B4', '#87CEEB', '#4169E1', '#7B68EE']);
   private onTrackerAccVisit$: Subscription;
-
+  private xDomain = ['Zone1', 'Zone2', 'Zone3', 'Zone4'];
   constructor(private mapService: MapService) { }
 
   ngOnInit() {
@@ -65,21 +65,21 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
       // .ease(d3.easeLinear)
       // .delay((d, i) =>  200 + i * 50)
       .duration(800)
-      .attrTween('d', function(d, i) { return self.arcTween(d, _current[i], self); });
+      .attrTween('d', function (d, i) { return self.arcTween(d, _current[i], self); });
 
-      this.textG
-        .transition()
-        .duration(1000)
-        .attr('transform', d => 'translate(' + this.arc.centroid(d) + ')')
-        .text(d => d.data === 0 ? '' : d.data);
-        // .tween('text', function (d) {
-        //   const node = this;
-        //   const _cur = node.textContent;
-        //   const i = d3.interpolateNumber(_cur, d.data);
-        //   return function (t) {
-        //     node.textContent = i(t).toFixed(1);
-        //   };
-        // });
+    this.textG
+      .transition()
+      .duration(1000)
+      .attr('transform', d => 'translate(' + this.arc.centroid(d) + ')')
+      .text(d => d.data === 0 ? '' : d.data);
+    // .tween('text', function (d) {
+    //   const node = this;
+    //   const _cur = node.textContent;
+    //   const i = d3.interpolateNumber(_cur, d.data);
+    //   return function (t) {
+    //     node.textContent = i(t).toFixed(1);
+    //   };
+    // });
   }
 
   onTrackerAccVisit(d: number[]) {
@@ -97,7 +97,7 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
     //   this.height = 300;
     //   this.circleWidth = 50;
     // }
-     /* ----------create svg------------*/
+    /* ----------create svg------------*/
     this.svg = d3.select(this.element).append('svg');
     this.svg.attr('class', 'chartBase')
               .attr('width', this.element.offsetWidth)
@@ -105,14 +105,14 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createChart() {
-     /* ----------create piedata------------*/
+    /* ----------create piedata------------*/
     this.pie = d3.pie().sort(null);
     this.piedata = this.pie(this.dataset);
-     /* ----------create arc generator------------*/
+    /* ----------create arc generator------------*/
     this.arc.innerRadius(this.innerRadius)
-            .outerRadius(this.outerRadius)
-            .padAngle(.03)
-            .cornerRadius(5);
+      .outerRadius(this.outerRadius)
+      .padAngle(.03)
+      .cornerRadius(5);
 
 
 
@@ -131,9 +131,9 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
       // .each(function(d) {this._current = d; })
       .transition()
       .ease(d3.easeLinear)
-      .delay((d, i) =>  100 + i * 50)
+      .delay((d, i) => 100 + i * 50)
       .duration(400)
-      .attrTween('d', function(d, i) { return self.arcTween(d, {startAngle: 0, endAngle: 0}, self); })
+      .attrTween('d', function (d, i) { return self.arcTween(d, { startAngle: 0, endAngle: 0 }, self); })
       .attr('transform', 'rotate(0, 0, 0)');
 
     /* ----------append text------------*/
@@ -142,7 +142,7 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
     this.textG
       .transition()
       .ease(d3.easeLinear)
-      .delay((d, i) =>  100 + i * 50)
+      .delay((d, i) => 100 + i * 50)
       .duration(400)
       .attr('transform', d => 'translate(' + this.arc.centroid(d) + ')')
       .attr('text-anchor', 'middle')
@@ -152,6 +152,35 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
     /* ----------append  middle text------------*/
     // g.append('text')
     //   .attr('text-anchor', 'middle').attr('fill', '#31708f').text(d => '');
+    this.svg.append('g').attr('class', 'g-legend');
+
+    const legend = this.svg
+      .select('.g-legend')
+      .selectAll('g')
+      .data(this.xDomain)
+      .enter()
+      .append('g');
+
+    legend.attr('class', 'legned').attr(
+      'transform',
+      (d, i) =>
+        `translate(${this.width - 90}, ${10 + (this.xDomain.length - i) * 28})`
+    );
+    // .attr("x", (d, i) => 100 * i + 100)
+    // .attr("y", 5);
+
+    legend
+      .append('rect')
+      .attr('width', 20)
+      .attr('height', 20)
+      .attr('fill', (d, i) => this.color(i));
+
+    legend
+      .append('text')
+      .text(d => d)
+      .attr('x', 23)
+      .attr('y', 15)
+      .attr('fill', (d, i) => '#555');
   }
 
   scaleSize() {
@@ -167,7 +196,7 @@ export class MapPieComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   arcTween(d, _current, self) {
-      return (t) => {
+    return (t) => {
       const interpolate = d3.interpolate(_current, d);
       return self.arc(interpolate(t));
     };

@@ -1,18 +1,48 @@
 <div class="chart-container">
-    <div class="chart-display">
+  <div class="chart-display">
+    <div *ngIf="isBarSelected()" class="container">
+      <div class="row">
+        <h4 class="h4-title">
+          Zone_{{ getSelectedZoneIndex() + 1 }} Accumulative Visit
+        </h4>
+        <table [class.component]="true" class="table">
+          <thead>
+            <tr>
+              <th class="td-title">Tracker</th>
+              <th>Accumulative Viist (Seconds)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              (click)="onCellClick(i)"
+              *ngFor="let tracker of getZoneDataset(); let i = index"
+            >
+              <td
+                [ngClass]="{ 'td-highlight': isTrHighlight(i) }"
+                class="td-title"
+              >
+                {{ tracker.name }}
+              </td>
+              <td
+                [ngClass]="{ 'td-highlight': isTrHighlight(i) }"
+                class="td-value"
+              >
+                {{ tracker.accVisit }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
+    <div *ngIf="!isBarSelected()" class="container">
+      <div class="row">
+        <h4>Select to view </h4>
+      </div>
+    </div>
+  </div>
 
-        <div *ngIf="isBarSelected()" class="container">
-            <div class="row">
-                <h4>Zone_{{getSelectedZoneIndex() + 1}} Accumulative Visit by Tracker</h4>
-            </div>
-        </div>
-
-        <div *ngIf="!isBarSelected()" class="container">
-            <div class="row">
-                <h4>Select a Bar to view accumulative visit</h4>
-            </div>
-        </div>
-    </div>  
-    <div class="d3-chart" #chart></div>  
+  <div class="d3-chart" #chart>
+    <span>Accumulative Visits   grouped by Zone</span>
+  </div>
 </div>

@@ -25,6 +25,10 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
   status: number;
   note: string;
   participant: Participant;
+  locX: number;
+  locY: number;
+  productId: number;
+  mostVisit: number[] = [];
 
   private selectedTrackerSubscription: Subscription;
   private hasSelectedTrackerSubscription: Subscription;
@@ -34,6 +38,10 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
   constructor(private mapService: MapService) { }
 
   ngOnInit() {
+
+    if (this.mapService.selectedTrackerId !== null) {
+      this.setTrackerDetail(this.mapService.selectedTrackerId);
+    }
     // TODO get initial selected data
     // this.tracker = this.mapService
     this.selectedTrackerSubscription = this.mapService.selectedTrackerIndex.subscribe(
@@ -51,11 +59,14 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
       this.setTrackerDetail(null);
     });
     this.trackerLocChangeSubscription = this.mapService.trackerLocChanges.subscribe(({trackers, dur}) => {
-        // const data = trackers;
+        // const data = trackers
         this.time = this.editedTrackerIndex ? this.mapService.getTrackerTime(this.editedTrackerIndex) : null;
         this.fullName =  this.editedTrackerIndex ? this.mapService.getTrackerAlias(this.editedTrackerIndex) : null;
-        this.timeCurrent = this.tracker && this.tracker.locs && this.tracker.locs.length > 0 ?
-        this.tracker.locs[this.tracker.currentLoc].time - this.tracker.locs[0].time : 0;
+        // this.timeCurrent = this.tracker && this.tracker.locs && this.tracker.locs.length > 0 ?
+        // this.tracker.locs[this.tracker.currentLoc].time - this.tracker.locs[0].time : 0;
+        this.productId = this.editedTrackerIndex ? this.mapService.getTrackerProductId(this.editedTrackerIndex)  : null;
+        [this.locX, this.locY] = this.editedTrackerIndex ? this.mapService.getTrackerCurLoc(this.editedTrackerIndex) : [ null, null];
+        this.mostVisit = this.editedTrackerIndex ? this.mapService.getTrackerMostVisit(this.editedTrackerIndex) : null;
     });
     this.mapStopSub = this.mapService.onStopped.subscribe(() => {
       this.time = null;
@@ -98,6 +109,10 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
       this.time = null;
       this.timeTotal = 0;
       this.timeCurrent = 0;
+      this.productId = null;
+      this.locX = null;
+      this.locY = null;
+      this.mostVisit = [];
       return;
     } else {
       this.editedTrackerIndex = index - 1;
@@ -111,6 +126,12 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
        this.tracker.locs[this.tracker.locs.length - 1].time - this.tracker.locs[0].time : 0;
       this.timeCurrent = this.tracker.locs && this.tracker.locs.length > 0 ?
        this.tracker.locs[this.tracker.currentLoc].time - this.tracker.locs[0].time : 0;
+      this.productId = this.tracker.productId;
+      this.locX = Math.floor(this.tracker.xCrd);
+      this.locY = Math.floor(this.tracker.yCrd);
+      const max = this.tracker.accVisit.reduce((acc, curr) => curr > acc ? curr : acc);
+      const mostVisit = this.tracker.accVisit.reduce((acc: number[], curr, idx) => curr === max ? [...acc, idx] : acc, []);
+      this.mostVisit = mostVisit;
     }
   }
 
@@ -123,5 +144,13 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
     const secondStr = seconds < 10 ? '0' + seconds : '' + seconds;
 
     return `${hourStr}:${minuteStr}:${secondStr}`;
+  }
+
+  mostVisitStr() {
+    if (!this.mostVisit || this.mostVisit === null || this.mostVisit.length === 0) {
+      return;
+    }
+
+    return this.mostVisit.map(i => `Zone_${i + 1}  `);
   }
 }

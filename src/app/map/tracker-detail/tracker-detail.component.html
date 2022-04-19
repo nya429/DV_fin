@@ -6,8 +6,11 @@
             <a  title='submit' type="submit" class="btn btn-sm btn-success" (click)="onUpdate(f)"><i class="glyphicon glyphicon-ok"></i></a>
             <a  title='edit' type="button" class="btn btn-sm btn-danger" (click)="onCancle()"><i class="glyphicon glyphicon-remove"></i></a>
           </div> -->
-  <div class="col-md-3 col-lg-3" align="center">
+  <div class="col-md-4 col-lg-4" align="center">
     <div class="row">
+      <br>
+      <div>Tracker's Accumulative Visits</div>
+      <div>grouped by Zone</div>
       <br>
       <app-map-pie editedTrackerIndex="editedTrackerIndex"></app-map-pie>
       <!-- <a *ngIf="editMode" title='upload Image' type="button" class="btn editImg"><i class="glyphicon glyphicon-edit"></i></a> -->
@@ -22,13 +25,15 @@
                 </div>            
             </div> -->
   </div>
-  <div class="col-md-9 col-lg-9">
+  <div class="col-md-8 col-lg-8">
+    <br>
+    <br>
     <table class="table" *ngIf="!editMode">
       <thead>
         <tr>
           <h4 class="detail-name">{{ fullName }}</h4>
           <!-- <span> {{ participant?.priorityStatus | priorityStatus}}</span> -->
-          <td class="detail-time">{{ time | date: "MM/d/y HH:mm:ss" }}</td>
+          <td class="detail-time">{{ time | date: "mm:ss" }}</td>
         </tr>
         <div></div>
       </thead>
@@ -41,18 +46,18 @@
           <td class="td-value">{{ fullName }}</td>
         </tr>
         <tr>
-          <td class="td-title">Status :</td>
-          <td class="td-value">Stable</td>
-          <td class="td-title">Company :</td>
-          <td class="td-value">{{ participant?.companyName }}</td>
+          <td class="td-title">Current Loc:</td>
+          <td class="td-value">[{{locX}}, {{locY}}]</td>
+          <td class="td-title">Current Visit :</td>
+          <td class="td-value">{{ productId ? "Zone_" + productId : "" }}</td>
         </tr>
         <tr>
-          <td class="td-title">Online time :</td>
+          <td class="td-title">Most Visit:</td>
           <td class="td-value">
-            {{ toHHMMSS(timeCurrent) }} / {{ toHHMMSS(timeTotal) }}
+            {{ mostVisitStr() }} 
           </td>
-          <td class="td-title">Job title :</td>
-          <td class="td-value">{{ participant?.jobTitle }}</td>
+          <!-- <td class="td-title">Job title :</td>
+          <td class="td-value">{{ participant?.jobTitle }}</td> -->
         </tr>
       </tbody>
     </table>
