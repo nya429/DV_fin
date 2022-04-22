@@ -1,48 +1,49 @@
-<div class="chart-container">
-  <div class="chart-display">
-    <div *ngIf="isBarSelected()" class="container">
-      <div class="row">
-        <h4 class="h4-title">
-          Zone_{{ getSelectedZoneIndex() + 1 }} Accumulative Visit
-        </h4>
-        <table [class.component]="true" class="table">
-          <thead>
-            <tr>
-              <th class="td-title">Tracker</th>
-              <th>Accumulative Viist (Seconds)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              (click)="onCellClick(tracker.id)"
-              *ngFor="let tracker of getZoneDataset(); "
-            >
-              <td
-                [ngClass]="{ 'td-highlight': isTrHighlight(tracker.id) }"
-                class="td-title"
+<div class="container chart-container">
+  <div class="row">
+    <div class="d3-chart col-md-7 col-lg-7" #chart>
+      <span>Accumulative Visits grouped by Zone</span>
+    </div>
+    <div class="chart-display col-md-5 col-lg-5">
+      <div *ngIf="isBarSelected()" class="container">
+        <div class="row">
+          <h4 class="h4-title">
+            Zone_{{ getSelectedZoneIndex() + 1 }} Accumulative Visit
+          </h4>
+          <table [class.component]="true" class="table">
+            <thead>
+              <tr>
+                <th class="td-title">Tracker</th>
+                <th>Accumulative Viist (Seconds)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                (click)="onCellClick(tracker.id)"
+                *ngFor="let tracker of getZoneDataset()"
               >
-                {{ tracker.name }}
-              </td>
-              <td
-                [ngClass]="{ 'td-highlight': isTrHighlight(tracker.id) }"
-                class="td-value"
-              >
-                {{ tracker.accVisit ? tracker.accVisit : "" }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <td
+                  [ngClass]="{ 'td-highlight': isTrHighlight(tracker.id) }"
+                  class="td-title"
+                >
+                  {{ tracker.name }}
+                </td>
+                <td
+                  [ngClass]="{ 'td-highlight': isTrHighlight(tracker.id) }"
+                  class="td-value"
+                >
+                  {{ tracker.accVisit ? tracker.accVisit : "" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="!isBarSelected()" class="container">
+        <div class="row">
+          <h4>Select to view</h4>
+        </div>
       </div>
     </div>
-
-    <div *ngIf="!isBarSelected()" class="container">
-      <div class="row">
-        <h4>Select to view </h4>
-      </div>
-    </div>
-  </div>
-
-  <div class="d3-chart" #chart>
-    <span>Accumulative Visits   grouped by Zone</span>
   </div>
 </div>

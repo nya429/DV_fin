@@ -22,6 +22,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
   private popupSubscription: Subscription;
   private loadingStatusSubscription: Subscription;
   private windowResizeSubscription: Subscription;
+  private onZoneSelected$: Subscription;
   /** API */
   private base: {width: number, height: number};
   private margin: any = { top: 0, bottom: 0, left: 0, right: 0};
@@ -54,12 +55,14 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
   private popupWidth = 250;
   private popupHeight = 150;
   /** not used */
-  private colors: any;
+  private color = d3.scaleOrdinal().range(['#1E90FF', '#00CED1', '#4682B4', '#87CEEB', '#4169E1', '#7B68EE']);
   private xAxis: any;
   private yAxis: any;
   /** Map_img */
   // private mapBackImgViewBox;
   private mapBackImg;
+  private backG;
+
   /** Map_size&pos_control */
   private mapDimensionControlPanel: any;
   // TODO this height need to change when the container changed
@@ -98,6 +101,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
       }
     });
     this.windowResizeSubscription = this.mapService.windowResized.subscribe(() => this.mapResize());
+    this.onZoneSelected$ = this.mapService.onZoneSelected.subscribe(d => this.onZoneSelected(d));
   }
 
   ngOnDestroy() {
@@ -108,6 +112,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     this.popupSubscription.unsubscribe();
     this.loadingStatusSubscription.unsubscribe();
     this.windowResizeSubscription.unsubscribe();
+    this.onZoneSelected$.unsubscribe();
     this.mapService.closeEventSource();
     clearTimeout(this.mapPosControlTimer);
     clearInterval(this.mapPosControlInterval);
@@ -325,47 +330,106 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
 
   appendMapBackgroundImg() {
     // this.svg.select('.mapImgViewBox')
-    this.svg.selectAll('svg').data([0]).enter()
-      .append('svg:image')
-      .attr('class', 'mapImg');
+    // this.svg.selectAll('svg').data([0]).enter()
+    //   .append('svg:image')
+    //   .attr('class', 'mapImg');
 
-    this.mapBackImg = d3.select('.mapImg');
-    this.mapBackImg
-    // svg:image will not overwrite the inline preserveAspectRatio
-    .attr('preserveAspectRatio', 'xMinYMin meet')
-      .attr('xlink:href', '../../../assets/store_floorplan.svg')
-      // API: position
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('x',   (615 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetX)
-      .attr('y', (500 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetY)
-      // API: dimensions
-      .attr('width', this.width)
-      .attr('height', this.height)
-      .attr('width', this.width * this.mapPosScale.scale)
-      .attr('height', this.height * this.mapPosScale.scale)
-      .attr('opacity', 0)
-      .transition()
-      .duration(1000)
-      .delay(500)
-      .attr('opacity', .6);
+    // this.mapBackImg = d3.select('.mapImg');
+    // this.mapBackImg
+    // // svg:image will not overwrite the inline preserveAspectRatio
+    // .attr('preserveAspectRatio', 'xMinYMin meet')
+    //   .attr('xlink:href', '../../../assets/store_floorplan.svg')
+    //   // API: position
+    //   .attr('x', 0)
+    //   .attr('y', 0)
+    //   .attr('x',   (615 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetX)
+    //   .attr('y', (500 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetY)
+    //   // API: dimensions
+    //   .attr('width', this.width)
+    //   .attr('height', this.height)
+    //   .attr('width', this.width * this.mapPosScale.scale)
+    //   .attr('height', this.height * this.mapPosScale.scale)
+    //   .attr('opacity', 0)
+    //   .transition()
+    //   .duration(1000)
+    //   .delay(500)
+    //   .attr('opacity', .1);
+    const that = this;
+    this.backG = this.svg.append('g')
+    .attr('class', 'backG')
+    .attr('transform', 'translate(0, 0)');
 
+    this.backG.attr('opacity', 0)
+    .transition()
+    .duration(1000)
+    .delay(500)
+    .attr('opacity', .7);
+
+    this.backG
+    .append('rect')
+    .attr('width', this.width)
+    .attr('height', this.height)
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('x',   (615 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetX + 5)
+    .attr('y', (500 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetY + 5)
+    .attr('width', (this.width - 240) * this.mapPosScale.scale)
+    .attr('height', (this.height - 10) * this.mapPosScale.scale)
+    .attr('fill', 'none')
+    .attr('stroke', 'white')
+    .attr('stroke-width', 8);
+
+    this.backG.selectAll().data([0, 1, 2, 3]).enter()
+    .append('rect')
+    .attr('class', 'zone-rect')
+    .attr('id', d => 'zone-' + d)
+    .attr('x', (d, i) => 85 + 133 * d)
+    .attr('y', 128)
+    .attr('width', 44)
+    .attr('height', 290)
+    .attr('fill', (d, i) => this.color(i));
+
+   console.log(    this.backG.selectAll('.zone-rect'))
+    this.backG.selectAll('.zone-rect')
+    .style('cursor', 'pointer')
+    .on('click', function(d, i)  {
+      console.log(d)
+      d3.event.stopPropagation();
+      that.mapService.setSelectedZoneIndex(d);
+    });
   }
 
   sizeBackImg(offsetWidth, offsetHeight, dur = 10) {
-    this.mapBackImg
-      .transition()
-      .duration(dur)
-      // .attr('x', 0 + this.mapPosScale.offsetX)
-      // .attr('y', 0 + this.mapPosScale.offsetY)
-      .attr('x',   (615 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetX)
-      .attr('y', (500 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetY)
-      // API: dimensions
-      .attr('width', offsetWidth)
-      .attr('height', offsetHeight)
-      .attr('width', offsetWidth * this.mapPosScale.scale)
-      .attr('height', offsetHeight * this.mapPosScale.scale)
-      ;
+    // this.mapBackImg
+    //   .transition()
+    //   .duration(dur)
+    //   // .attr('x', 0 + this.mapPosScale.offsetX)
+    //   // .attr('y', 0 + this.mapPosScale.offsetY)
+    //   .attr('x',   (615 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetX)
+    //   .attr('y', (500 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetY)
+    //   // API: dimensions
+    //   .attr('width', offsetWidth)
+    //   .attr('height', offsetHeight)
+    //   .attr('width', offsetWidth * this.mapPosScale.scale)
+    //   .attr('height', offsetHeight * this.mapPosScale.scale)
+    //   ;
+
+
+    this.backG
+    .transition()
+    .duration(dur)
+    .attr('transform', `translate(${(615 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetX},
+     ${(500 / 2) * (1 - this.mapPosScale.scale) + this.mapPosScale.offsetY})
+     scale(${this.mapPosScale.scale})`);
+  }
+
+  onZoneSelected(index) {
+    this.backG
+    .selectAll('.zone-rect')
+    .transition()
+    .duration(800)
+    .attr('stroke', (d, i) => d === index ? 'white' : 'none')
+    .attr('stroke-width', 5);
   }
 
   initiateTrackPoint(trackers: Tracker[]) {
@@ -629,7 +693,8 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     const that = this;
     this.mapPopup = this.svg.insert('g')
       .attr('class', 'mapPopup')
-      .style('opacity', 0);
+      .style('opacity', 0)
+      .style('display', 'none');
 
     this.mapPopup.insert('rect')
       .attr('class', 'popupBackground')
@@ -669,7 +734,7 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
       return false;
     }
       this.onPopupChange(text);
-
+      this.mapPopup.style('display', 'block');
       this.mapPopup
       .transition(100)
       .ease(d3.easeLinear)
@@ -692,7 +757,9 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     .transition(500)
     .ease(d3.easeLinear)
     .delay(d => delay ? 800 : 0)
-    .style('opacity', 0);
+    .style('opacity', 0)
+   .style('display', 'none');
+
   }
 
   mapResize() {

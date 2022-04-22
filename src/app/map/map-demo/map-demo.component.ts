@@ -21,7 +21,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   private height: number;
   private xScale: any;
   private yScale: any;
-  private colors: any;
+  private color = d3.scaleOrdinal().range(['#1E90FF', '#00CED1', '#4682B4', '#87CEEB', '#4169E1', '#7B68EE']);
   private xAxis: any;
   private yAxis: any;
   private xAxisG: any;
@@ -52,7 +52,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.dataset = this.mapService.getAccVisit();
     this.zoneDataset = this.mapService.getAccVisitByZone();
-    this.getSelectedZoneIndex();
+    // this.getSelectedZoneIndex();
     this.initBase();
     this.initChart();
     setTimeout(() => {
@@ -177,7 +177,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
     this.rectBar.data(this.dataset).selectAll('rect').data(d => d);
     this.texts.data(this.dataset).selectAll('text').data(d => d);
 
-    this.yAxisG.transition() .duration(dur ? duration1 : 0).call(this.yAxis);
+    this.yAxisG.transition().duration(duration1).call(this.yAxis);
 
     this.rectBar
       .transition()
@@ -210,7 +210,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
       .attr('y', d => this.yScale(d) + this.padding.top)
       // .transition()
       // .delay(duration2)
-      .attr('x', (d, i) => this.padding.left + this.xScale(i) - 30 + this.rectPadding / 2)
+      .attr('x', (d, i) => this.padding.left + this.xScale(i) - 38 + this.rectPadding / 2)
       ;
 
     this.svg
@@ -296,7 +296,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
       .attr('class', 'bar-G')
       .data(this.dataset)
       .enter().append('rect');
-
+    const selectedZoneIndex = this.getSelectedZoneIndex();
     this.rectBar.attr('x', (d, i) => {
       return that.padding.left + that.xScale(i) + that.rectPadding / 2;
     })
@@ -308,6 +308,8 @@ export class MapDemoComponent implements OnInit, OnDestroy {
         return 0;
       })
       .attr('fill', 'skyblue')
+      .attr('opacity', (da, idx) => selectedZoneIndex !== null && idx !== selectedZoneIndex ? 0.6 : 1)
+      // .attr('fill', (d, i) => this.color(i))
       .transition()
       .delay(function (d, i) {
         return i * 50;
@@ -328,6 +330,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
       .append('text')
       .attr('class', 'BarText');
 
+
     this.texts.attr('transform', 'translate(' + this.padding.left + ',' + this.padding.top + ')')
       .attr('x', function (d, i) {
         return that.xScale(i) + that.rectPadding / 2;
@@ -336,7 +339,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
         return that.yScale(0) + that.padding.top;
       })
       .attr('dx', function () {
-        return (that.xScale.bandwidth() - 30 - that.rectPadding) / 2;
+        return (that.xScale.bandwidth() - 38 - that.rectPadding) / 2;
       })
       .attr('dy', function (d) {
         return 20;
@@ -368,6 +371,36 @@ export class MapDemoComponent implements OnInit, OnDestroy {
       this.onDiselectBar();
       this.rectBar.attr('opacity', (da, idx) => 1);
     });
+
+    // this.svg.append('g').attr('class', 'g-legend');
+
+    // const legend = this.svg
+    //   .select('.g-legend')
+    //   .selectAll('g')
+    //   .data(this.xDomain)
+    //   .enter()
+    //   .append('g');
+
+    // legend.attr('class', 'legned').attr(
+    //   'transform',
+    //   (d, i) =>
+    //     `translate(${this.width - 90}, ${10 + (this.xDomain.length - i) * 28})`
+    // );
+    // // .attr("x", (d, i) => 100 * i + 100)
+    // // .attr("y", 5);
+
+    // legend
+    //   .append('rect')
+    //   .attr('width', 20)
+    //   .attr('height', 20)
+    //   .attr('fill', (d, i) => this.color(i));
+
+    // legend
+    //   .append('text')
+    //   .text(d => d)
+    //   .attr('x', 23)
+    //   .attr('y', 15)
+    //   .attr('fill', (d, i) => '#555');
   }
 
   onBarClick(i: number): void {

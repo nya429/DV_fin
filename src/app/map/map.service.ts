@@ -52,6 +52,7 @@ export class MapService {
     onLoading = new Subject<boolean>();
     onLoaded = new Subject<boolean>();
     onPaused = new Subject<boolean>();
+    onZoneSelected = new Subject<number>();
     dropdownFolded = new Subject<boolean>();
 
     pageBlur = new Subject<boolean>();
@@ -838,6 +839,7 @@ export class MapService {
 
     setSelectedZoneIndex(i: number): void {
         this.selectedZoneIndex = i;
+        this.onZoneSelected.next(this.selectedZoneIndex);
     }
 
     getSelectedZoneIndex(): number {
@@ -846,6 +848,7 @@ export class MapService {
 
     diselecctZoneIndex() {
         this.selectedZoneIndex = null;
+        this.onZoneSelected.next(this.selectedZoneIndex);
     }
 
     getAccVisitByZone() {

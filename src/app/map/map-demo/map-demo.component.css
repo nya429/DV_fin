@@ -1,9 +1,14 @@
 
 .d3-chart {
-  width: 60%;
+  /* width: 60%; */
   height: 500px;
   float: left;
 
+}
+.chart-display {
+  /* width:20%; */
+  height: 300px;
+  display: inline-block;
 }
 
 .d3-chart > span {
@@ -28,11 +33,6 @@
     shape-rendering: crispEdges;
 }
 
-.chart-display {
-  width:20%;
-  height: 300px;
-  display: inline-block;
-}
 
 .chart-container {
   position: relative;
@@ -62,7 +62,7 @@
 }
 
 .td-highlight {
-  background: skyblue;
+  background: deepskyblue;
   /* font-weight: bold; */
   color: white;
   transition: .3s;
