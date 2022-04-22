@@ -32,21 +32,21 @@ export class MapComponent implements OnInit, OnDestroy {
     this.mapService.onCompanyDropdownFolded(true);
   }
 
-  @HostListener('window:blur')
-  onLeave() {
-    if (this.mapService.mapStarted) {
-      this.leave = true;
-    }
-    this.mapService.stop();
-  }
+  // @HostListener('window:blur')
+  // onLeave() {
+  //   if (this.mapService.mapStarted) {
+  //     this.leave = true;
+  //   }
+  //   this.mapService.stop();
+  // }
 
-  @HostListener('window:focus')
-  onFocus() {
-    if (this.leave) {
-      this.mapService.onLeavePage();
-      this.leave = false;
-    }
-  }
+  // @HostListener('window:focus')
+  // onFocus() {
+  //   if (this.leave) {
+  //     this.mapService.onLeavePage();
+  //     this.leave = false;
+  //   }
+  // }
 
   @HostListener('window:resize')
   onResize() {

@@ -40,7 +40,6 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     if (this.mapService.selectedTrackerId !== null) {
-      console.log(this.mapService.selectedTrackerId)
       this.setTrackerDetail(this.mapService.selectedTrackerId + 1);
     }
     // TODO get initial selected data
@@ -61,13 +60,14 @@ export class TrackerDetailComponent implements OnInit, OnDestroy {
     });
     this.trackerLocChangeSubscription = this.mapService.trackerLocChanges.subscribe(({trackers, dur}) => {
         // const data = trackers
-        this.time = this.editedTrackerIndex ? this.mapService.getTrackerTime(this.editedTrackerIndex) : null;
-        this.fullName =  this.editedTrackerIndex ? this.mapService.getTrackerAlias(this.editedTrackerIndex) : null;
+        this.time = this.editedTrackerIndex !== null ? this.mapService.getTrackerTime(this.editedTrackerIndex) : null;
+        this.fullName =  this.editedTrackerIndex !== null ? this.mapService.getTrackerAlias(this.editedTrackerIndex) : null;
         // this.timeCurrent = this.tracker && this.tracker.locs && this.tracker.locs.length > 0 ?
         // this.tracker.locs[this.tracker.currentLoc].time - this.tracker.locs[0].time : 0;
-        this.productId = this.editedTrackerIndex ? this.mapService.getTrackerProductId(this.editedTrackerIndex)  : null;
-        [this.locX, this.locY] = this.editedTrackerIndex ? this.mapService.getTrackerCurLoc(this.editedTrackerIndex) : [ null, null];
-        this.mostVisit = this.editedTrackerIndex ? this.mapService.getTrackerMostVisit(this.editedTrackerIndex) : null;
+        this.productId = this.editedTrackerIndex !== null ? this.mapService.getTrackerProductId(this.editedTrackerIndex)  : null;
+        [this.locX, this.locY] = this.editedTrackerIndex !== null ? this.mapService.getTrackerCurLoc(this.editedTrackerIndex) :
+         [ null, null];
+        this.mostVisit = this.editedTrackerIndex !== null ? this.mapService.getTrackerMostVisit(this.editedTrackerIndex) : null;
     });
     this.mapStopSub = this.mapService.onStopped.subscribe(() => {
       this.time = null;

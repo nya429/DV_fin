@@ -144,7 +144,7 @@ export class MapService {
         Object.keys(mapPosScale).forEach(key => {
             const value = mapPosScale[key];
             if (this.mapPosScale[key] !== value) {
-                console.log(this.mapPosScale[key], value);
+                // console.log(this.mapPosScale[key], value);
                 this.settingService.updateMapSetting(key, value.toString());
             }
         });
@@ -172,20 +172,20 @@ export class MapService {
     }
 
     start() {
-        console.log('am I ever called?');
+        // // console.log('am I ever called?');
         this.onStarted.next(this.mapStarted);
     }
 
     startSync() {
-        console.log('startSync', this.mapStarted);
+        // console.log('startSync', this.mapStarted);
         if (this.mapStarted) {
-            console.log('already start emit1');
+            // console.log('already start emit1');
             this.onStarted.next(this.mapStarted);
             return;
         }
 
         if (this.mapInitiated) {
-            console.log('already start emit2');
+            // console.log('already start emit2');
             this.onStarted.next(this.mapStarted);
             return;
         }
@@ -218,8 +218,8 @@ export class MapService {
             //     (result) => {
             //       const data = result['data'];
             //       this.trackers.forEach(trac => {
-            //           console.log(trac);
-            //         //   console.log(data,data[`${trac.tagId}`])
+            //           // console.log(trac);
+            //         //   // console.log(data,data[`${trac.tagId}`])
             //         trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
             //         (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width);
             //       });
@@ -239,7 +239,7 @@ export class MapService {
         }
 
         if (this.serviceInterval) {
-            console.log('clearInterval');
+            // console.log('clearInterval');
             clearInterval(this.serviceInterval);
         }
 
@@ -293,6 +293,7 @@ export class MapService {
     }
 
     getTrackerAlias(index: number) {
+        // console.log(index)
         if (this.trackers.slice()[index].alias) {
             return this.trackers.slice()[index].alias;
         }
@@ -371,7 +372,7 @@ export class MapService {
              this.trackers.forEach(trac =>
                trac.setCrd((data[trac.tagId].loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
                (data[trac.tagId].loc_y + 0.5) / this.trackerBoundary.y * this.base.width));
-            //    console.log(this.trackers[0]);
+            //    // console.log(this.trackers[0]);
                this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
         });
     }
@@ -401,7 +402,7 @@ export class MapService {
     }
 
     onTrackerHasSelected(id: number | null) {
-        console.log(id)
+        // console.log(id)
         this.selectedTrackerId = id !== null ? id - 1 : null;
         this.hasSelectedTracker.next(id);
     }
@@ -411,8 +412,8 @@ export class MapService {
             tracker => {
                 if (tracker.id === id) {
                     tracker.activated = !tracker.isActivated();
-                    // console.log('this point activated?' , tracker.isActivated());
-                    // console.log('this point selected?' , tracker.selected);
+                    // // console.log('this point activated?' , tracker.isActivated());
+                    // // console.log('this point selected?' , tracker.selected);
                 }
                 return tracker;
             }
@@ -427,7 +428,7 @@ export class MapService {
     }
 
     updateTrackerInfo(index: number, form: any) {
-        console.log('update', index, form.alias);
+        // console.log('update', index, form.alias);
         // TODO replace this after having backend;
         this.trackers[index].alias = form.alias;
         this.trackerLocChanges.next({trackers: [...this.trackers], dur: 1000});
@@ -451,7 +452,7 @@ export class MapService {
                 // should be some where else
                 this.stop();
                 const participants = result['data']['participants'];
-                // console.log(participants);
+                // // console.log(participants);
                 if (participants && participants.length > 0) {
                     this.changeTrackers(participants);
                 } else {
@@ -470,8 +471,8 @@ export class MapService {
         //   trackers.push(tracker);
         //   if (i === participants.length - 1) {
         //     this.trackers = trackers.slice();
-        //     console.log('DEBUG changeTrackers');
-        //      console.log('DEBUG', this.trackers);
+        //     // console.log('DEBUG changeTrackers');
+        //      // console.log('DEBUG', this.trackers);
         //     this.trackerListChanges.next();
         //   }
         // });
@@ -487,7 +488,7 @@ export class MapService {
     getParticipantLocalsByTime(id: string, begin?: number, end?: number) {
         const urlSuffix = 'locations';
         const con = {'begin': begin, 'end': end, 'tracker_id': id};
-        // console.log('DEBUG', con);
+        // // console.log('DEBUG', con);
         return this.httpClient.post(`${this.httpOptions.eventUrl()}/${urlSuffix}`, con, {
             observe: 'body',
             responseType: 'json',
@@ -495,7 +496,7 @@ export class MapService {
           .subscribe(
               (result) => {
                 const data = result['data'];
-                console.log('DEBUG', 'getParticipantLocalsByTime', data);
+                // console.log('DEBUG', 'getParticipantLocalsByTime', data);
                 this.trackerLocsReady.next(data);
               }, (err: HttpErrorResponse)  => {
                 console.error(err);
@@ -542,7 +543,7 @@ export class MapService {
           .subscribe(
               (result) => {
                 const trackers = result['data'];
-                console.log('DEBUG getLastActiveTracker', trackers);
+                // console.log('DEBUG getLastActiveTracker', trackers);
                 if (trackers && trackers.length > 0) {
                     // this.stop();
                     this.changeTrackers(trackers);
@@ -565,7 +566,7 @@ export class MapService {
     testHistoryLocals() {
         // map particiapnt id, pass the id
         // TODO put getLastActive under subscribe
-        console.log('testHistoryLocals', this.mapStarted);
+        // console.log('testHistoryLocals', this.mapStarted);
         if (this.mapStarted) {
             this.onTest.next(this.mapStarted);
             return;
@@ -631,7 +632,7 @@ export class MapService {
                 this.testMoveHis(tracker, index);
             });
             this.updateInstantVisitByTime();
-            // console.log(this.sysTime);
+            // // console.log(this.sysTime);
             // this.rnadomData();    // remove it after api finished
             this.calcAccVisit();
             this.emitChartData();
@@ -651,7 +652,7 @@ export class MapService {
             t.accVisit.forEach((a, i) => accVisit[i] += a);
         });
         this.accVisitData = accVisit;
-        // console.log(this.accVisitData);
+        // // console.log(this.accVisitData);
         // this.calcAccVisitByZone();
     }
 
@@ -766,7 +767,7 @@ export class MapService {
         tracker.setCrd((nextLoc.loc_x + 0.5) / this.trackerBoundary.x * this.base.width,
             (nextLoc.loc_y + 0.5)  / this.trackerBoundary.y * this.base.height);
         // tracker.setTime(nextLoc.time * 1000);
-        // console.log(nextLoc.product_id)
+        // // console.log(nextLoc.product_id)
         tracker.setProductId(nextLoc.product_id);
         tracker.setTime(nextLoc.time );
         tracker.setAccVisit(nextLoc.preSum);
@@ -803,7 +804,7 @@ export class MapService {
                 this.setSysTime(nextLoc.time);
             }
         });
-        // console.log(this.sysTime);
+        // // console.log(this.sysTime);
 
         this.updateInstantVisitByTime();
         this.calcAccVisit();

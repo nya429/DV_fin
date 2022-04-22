@@ -34,7 +34,7 @@ export class SettingService {
     poped = new Subject<object>();
 
     constructor(private httpClient: HttpClient) {
-        this.api = new API('localhost');
+        this.api = new API('aws');
 
         this.httpOptions = {
             headers: new HttpHeaders({
