@@ -44,7 +44,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
   // private onPauseSubscription: Subscription;
   private ononAccZone$: Subscription;
   private onAccVisitByZone$: Subscription;
-
+  private onZoneSelected$: Subscription;
   // private chartStarted = false;
 
   constructor(private mapService: MapService) { }
@@ -60,7 +60,7 @@ export class MapDemoComponent implements OnInit, OnDestroy {
     }, 1000);
 
     this.onAccVisitByZone$ = this.mapService.onAccVisitByZone.subscribe(d => this.onSetAccVisitByZone(d));
-
+    this.onZoneSelected$ =  this.mapService.onZoneSelected.subscribe(d => this.onBarClicked(d));
     // this.onStartSubscription = this.mapService.started.subscribe(d => this.onStart(d));
     // this.onStopSubscription = this.mapService.onStopped.subscribe(d => this.onStop(d));
     // this.onTestSubscription = this.mapService.onTest.subscribe(d => this.onTest(d));
@@ -82,6 +82,10 @@ export class MapDemoComponent implements OnInit, OnDestroy {
 
     if (this.onAccVisitByZone$) {
       this.onAccVisitByZone$.unsubscribe();
+    }
+
+    if (this.onZoneSelected$) {
+        this.onZoneSelected$.unsubscribe();
     }
     // this.clearTimer();
   }
@@ -402,6 +406,12 @@ export class MapDemoComponent implements OnInit, OnDestroy {
     //   .attr('y', 15)
     //   .attr('fill', (d, i) => '#555');
   }
+
+  onBarClicked(i: number): void {
+    this.zoneDataset = this.mapService.getAccVisitByZone();
+    this.rectBar.attr('opacity', (da, idx) => i !== null && idx !== i ? 0.6 : 1);
+  }
+
 
   onBarClick(i: number): void {
     this.mapService.setSelectedZoneIndex(i);
