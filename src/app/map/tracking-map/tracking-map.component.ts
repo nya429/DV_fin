@@ -379,6 +379,19 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     .attr('stroke', 'white')
     .attr('stroke-width', 8);
 
+
+    this.backG.selectAll().data([0, 1, 2, 3]).enter()
+    .append('rect')
+    .attr('class', 'zone-rect-hl')
+    .attr('id', d => 'zone-' + d)
+    .attr('x', (d, i) => 85 - 27 + 133 * d)
+    .attr('y', 128 - 27)
+    .attr('width', 44 + 27 * 2)
+    .attr('height', 290 + 27 * 2)
+    .attr('fill', (d, i) => this.color(i))
+    .attr('opacity', 0);
+
+
     this.backG.selectAll().data([0, 1, 2, 3]).enter()
     .append('rect')
     .attr('class', 'zone-rect')
@@ -389,7 +402,9 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
     .attr('height', 290)
     .attr('fill', (d, i) => this.color(i));
 
-   console.log(    this.backG.selectAll('.zone-rect'))
+
+
+
     this.backG.selectAll('.zone-rect')
     .style('cursor', 'pointer')
     .on('click', function(d, i)  {
@@ -424,12 +439,18 @@ export class TrackingMapComponent implements OnInit, OnDestroy {
   }
 
   onZoneSelected(index) {
+    // this.backG
+    // .selectAll('.zone-rect')
+    // .transition()
+    // .duration(800)
+    // .attr('stroke', (d, i) => d === index ? 'white' : 'none')
+    // .attr('stroke-width', 5);
+
     this.backG
-    .selectAll('.zone-rect')
+    .selectAll('.zone-rect-hl')
     .transition()
-    .duration(800)
-    .attr('stroke', (d, i) => d === index ? 'white' : 'none')
-    .attr('stroke-width', 5);
+    .duration(500)
+    .attr('opacity', (d, i) => d === index ? .3 : 0);
   }
 
   initiateTrackPoint(trackers: Tracker[]) {
